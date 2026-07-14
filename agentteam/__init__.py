@@ -2,6 +2,21 @@
 
 __version__ = "0.7.6"
 
+# Exceptions
+from agentteam.exceptions import (
+    AgentTeamError,
+    AgentNotFoundError,
+    AgentSpawnError,
+    AuthenticationError,
+    ConfigurationError,
+    TeamAlreadyExistsError,
+    TeamNotFoundError,
+    TaskError,
+    TaskNotFoundError,
+    TransportError,
+    ValidationError,
+)
+
 # Core multi-agent framework (SDK-style)
 from agentteam.alerts import (
     Alert,
@@ -40,6 +55,19 @@ from agentteam.core import (
     create_team,
     get_team,
 )
+
+from agentteam.orchestrator.circuit_breaker import (
+    CircuitBreaker,
+    CircuitState,
+    CircuitOpenError,
+    get_circuit_breaker,
+    list_circuit_breakers,
+)
+
+from agentteam.team.snapshot import SnapshotManager
+from agentteam.team.dag import topological_sort, CycleDetectedError
+from agentteam.team.roles import assign_role, get_agent_roles, suggest_role, AgentRole
+from agentteam.async_core import AsyncExecutor
 
 # Orchestrator module (P6, P9)
 from agentteam.orchestrator import (
@@ -152,6 +180,19 @@ from agentteam.memory import (
 from agentteam.skill.engine import SkillEngine
 
 __all__ = [
+    # Exceptions
+    "AgentTeamError",
+    "TeamNotFoundError",
+    "TeamAlreadyExistsError",
+    "TaskNotFoundError",
+    "TaskError",
+    "AgentError",
+    "AgentNotFoundError",
+    "AgentSpawnError",
+    "ConfigurationError",
+    "TransportError",
+    "AuthenticationError",
+    "ValidationError",
     # Core multi-agent framework
     "Team",
     "Agent",
@@ -240,5 +281,5 @@ __all__ = [
     # Insights module (P16)
     "InsightsEngine",
     # Skill module (P13)
-    "SkillEngine",
+    "SkillEngine", "SnapshotManager", "topological_sort", "CycleDetectedError", "assign_role", "get_agent_roles", "suggest_role", "AgentRole", "AsyncExecutor", "CircuitBreaker", "CircuitState", "CircuitOpenError", "get_circuit_breaker", "list_circuit_breakers"
 ]

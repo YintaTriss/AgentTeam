@@ -19,10 +19,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v0.8.0--openclaw-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-v0.7.6-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/python-≥3.10-blue?style=for-the-badge&logo=python" alt="Python">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/tests-943%2B-brightgreen?style=for-the-badge" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-2129%2B-brightgreen?style=for-the-badge" alt="Tests">
 </p>
 
 <p align="center">
