@@ -344,27 +344,6 @@ def get_config() -> AppConfig:
     return _config
 
 
-def load_config(path: str = "config.yaml") -> AppConfig:
-    """Load configuration from file"""
-    global _config
-    # Check if path exists, otherwise check default config locations
-    config_path_obj = Path(path)
-    if not config_path_obj.exists():
-        # Try fallback locations in order:
-        # 1. ~/.agentteam/config.yaml (NEW - primary fallback)
-        # 2. ~/.config/agentteam/config.json (legacy fallback)
-        fallbacks = [
-            Path.home() / ".agentteam" / "config.yaml",
-            Path.home() / ".config" / "agentteam" / "config.json",
-        ]
-        for fallback in fallbacks:
-            if fallback.exists():
-                config_path_obj = fallback
-                break
-    _config = AppConfig.load(str(config_path_obj))
-    return _config
-
-
 def load_config_from_env(prefix: str = "AGENTTEAM_") -> AppConfig:
     """Load configuration from environment variables"""
     global _config
@@ -383,9 +362,40 @@ def save_config(cfg: AppConfig) -> None:
     config_file = Path.home() / ".config" / "agentteam" / "config.json"
     config_file.parent.mkdir(parents=True, exist_ok=True)
     data = cfg.to_dict()
+    # DEBUG: dump config for debugging identity test failure
+    import sys
+    print(f"[DEBUG save_config] cfg.user={cfg.user!r}", file=sys.stderr, flush=True)
+    print(f"[DEBUG save_config] data['user']={data.get('user', '<missing>')!r}", file=sys.stderr, flush=True)
     # Remove nested configs from top-level for old format
     with open(config_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, default=str)
+
+
+def load_config(path: str = "config.yaml") -> AppConfig:
+    """Load configuration from file"""
+    global _config
+    import sys
+    # DEBUG
+    print(f"[DEBUG load_config] called, _config type={type(_config).__name__}", file=sys.stderr, flush=True)
+    # Check if path exists, otherwise check default config locations
+    config_path_obj = Path(path)
+    if not config_path_obj.exists():
+        # Try fallback locations in order:
+        # 1. ~/.agentteam/config.yaml (NEW - primary fallback)
+        # 2. ~/.config/agentteam/config.json (legacy fallback)
+        fallbacks = [
+            Path.home() / ".agentteam" / "config.yaml",
+            Path.home() / ".config" / "agentteam" / "config.json",
+        ]
+        for fallback in fallbacks:
+            if fallback.exists():
+                config_path_obj = fallback
+                break
+    print(f"[DEBUG load_config] config_path_obj={config_path_obj}", file=sys.stderr, flush=True)
+    print(f"[DEBUG load_config] config_path_obj.exists()={config_path_obj.exists()}", file=sys.stderr, flush=True)
+    _config = AppConfig.load(str(config_path_obj))
+    print(f"[DEBUG load_config] loaded.user={_config.user!r}", file=sys.stderr, flush=True)
+    return _config
 
 
 def config_path() -> Path:
