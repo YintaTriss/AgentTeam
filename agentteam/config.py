@@ -370,11 +370,14 @@ def save_config(cfg: AppConfig) -> None:
 def load_config(path: Optional[str] = None) -> AppConfig:
     """Load configuration from file.
 
-    Resolution order (when path is None/empty):
-      1. $AGENTTEAM_CONFIG env var (explicit override)
-      2. ~/.config/agentteam/config.json (primary)
-      3. ~/.agentteam/config.yaml (legacy)
-      4. ./config.yaml (project-local — only if HOME fallbacks absent)
+    Resolution order:
+      1. If `path` is provided and the file exists, use it.
+      2. If `path` is provided but missing, return defaults (graceful).
+      3. If `path` is None, use this order:
+         a. $AGENTTEAM_CONFIG env var (if set, error if missing)
+         b. ~/.config/agentteam/config.json (primary)
+         c. ~/.agentteam/config.yaml (legacy)
+         d. ./config.yaml (project-local — last resort)
 
     Note: The previous default `path="config.yaml"` always checked CWD first,
     which made the test suite vulnerable to any project-local config.yaml
@@ -385,33 +388,35 @@ def load_config(path: Optional[str] = None) -> AppConfig:
     # Explicit override wins
     if path:
         config_path_obj = Path(path)
+        if config_path_obj.exists():
+            _config = AppConfig.load(str(config_path_obj))
+            return _config
+        # Missing explicit path: graceful fallback to defaults
+        logger.warning(f"Config file not found: {path}, using defaults")
+        _config = AppConfig.load("(default)")
+        return _config
+    env_override = os.environ.get("AGENTTEAM_CONFIG")
+    if env_override:
+        config_path_obj = Path(env_override)
         if not config_path_obj.exists():
-            raise ConfigError(f"Config file not found: {path}")
-    else:
-        env_override = os.environ.get("AGENTTEAM_CONFIG")
-        if env_override:
-            config_path_obj = Path(env_override)
-            if not config_path_obj.exists():
-                raise ConfigError(f"AGENTTEAM_CONFIG points to missing file: {env_override}")
-        else:
-            home_candidates = [
-                Path.home() / ".config" / "agentteam" / "config.json",
-                Path.home() / ".agentteam" / "config.yaml",
-            ]
-            config_path_obj = None
-            for cand in home_candidates:
-                if cand.exists():
-                    config_path_obj = cand
-                    break
-            if config_path_obj is None:
-                # Last resort: project-local config (legacy behaviour)
-                local = Path("config.yaml")
-                if local.exists():
-                    config_path_obj = local
-                else:
-                    # No config anywhere — use defaults
-                    config_path_obj = Path("(default)")
-    _config = AppConfig.load(str(config_path_obj))
+            raise ConfigError(f"AGENTTEAM_CONFIG points to missing file: {env_override}")
+        _config = AppConfig.load(str(config_path_obj))
+        return _config
+    home_candidates = [
+        Path.home() / ".config" / "agentteam" / "config.json",
+        Path.home() / ".agentteam" / "config.yaml",
+    ]
+    for cand in home_candidates:
+        if cand.exists():
+            _config = AppConfig.load(str(cand))
+            return _config
+    # Last resort: project-local config (legacy behaviour)
+    local = Path("config.yaml")
+    if local.exists():
+        _config = AppConfig.load(str(local))
+        return _config
+    # No config anywhere — use defaults
+    _config = AppConfig.load("(default)")
     return _config
 
 
