@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 class MessageStatus(Enum):
     """消息处理状态"""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -47,6 +48,7 @@ class IdempotencyKey:
     - 显式指定（业务自定义）
     - 复合生成（agent_id + task_id + 内容hash）
     """
+
     key: str
     agent_id: str
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -76,6 +78,7 @@ class IdempotencyKey:
 @dataclass
 class MessageRecord:
     """消息记录"""
+
     idempotency_key: str
     message_id: str
     status: MessageStatus
@@ -112,6 +115,7 @@ class MessageRecord:
 @dataclass
 class TransactionContext:
     """事务上下文"""
+
     transaction_id: str
     idempotency_keys: List[str] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -238,10 +242,7 @@ class IdempotencyStore:
             清除的记录数
         """
         with self._global_lock:
-            expired_keys = [
-                key for key, record in self._records.items()
-                if record.is_expired()
-            ]
+            expired_keys = [key for key, record in self._records.items() if record.is_expired()]
             for key in expired_keys:
                 del self._records[key]
             return len(expired_keys)
@@ -565,7 +566,9 @@ class IdempotencyManager:
                 raise ValueError(f"Transaction {transaction_id} not found")
 
             if tx.status != "active":
-                raise ValueError(f"Transaction {transaction_id} is not active (status: {tx.status})")
+                raise ValueError(
+                    f"Transaction {transaction_id} is not active (status: {tx.status})"
+                )
 
         # 准备消息列表（按添加顺序）
         messages = []
@@ -621,7 +624,9 @@ class IdempotencyManager:
             for key_str in tx.idempotency_keys:
                 record = self._store.get(key_str)
                 if record and record.status == MessageStatus.PROCESSING:
-                    self._store.update_status(key_str, MessageStatus.FAILED, error="Transaction rolled back")
+                    self._store.update_status(
+                        key_str, MessageStatus.FAILED, error="Transaction rolled back"
+                    )
 
             tx.status = "rolled_back"
             logger.info(f"Transaction {transaction_id} rolled back")
@@ -674,10 +679,9 @@ class IdempotencyManager:
         with self._global_lock:
             return {
                 "store_stats": self._store.get_stats(),
-                "active_transactions": len([
-                    tx for tx in self._transactions.values()
-                    if tx.status == "active"
-                ]),
+                "active_transactions": len(
+                    [tx for tx in self._transactions.values() if tx.status == "active"]
+                ),
                 "total_transactions": len(self._transactions),
                 "registered_handlers": len(self._handlers),
             }

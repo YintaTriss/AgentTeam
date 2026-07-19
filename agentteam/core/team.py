@@ -58,7 +58,7 @@ class CTTeam:
         self.socratic_elenchus = SocraticElenchus(self)
         # 富兰克林协作协议：冲突解决
         self.collaboration_protocol = CollaborationProtocol(self)
-        
+
         # ── Wiener 控制论反馈回路 ─────────────────────────────────
         # 真正的控制是对信息的反馈 - 完整的反馈回路
         from agentteam.philosophical import (
@@ -67,6 +67,7 @@ class CTTeam:
             GestellAnalyzer,
             FeedbackLoopConfig,
         )
+
         self.feedback_loop = CyberneticFeedbackLoop(
             config=FeedbackLoopConfig(
                 ack_timeout_seconds=30.0,
@@ -74,11 +75,11 @@ class CTTeam:
                 deviation_threshold=0.3,
             )
         )
-        
+
         # ── Simon 有限理性追踪器 ─────────────────────────────────
         # 多 agent 协调必须考虑每个 agent 的知识边界
         self.bounded_rationality = BoundedRationalityTracker()
-        
+
         # ── Heidegger 技术座架分析器 ──────────────────────────────
         # 技术框架决定了什么可以被问 - 分析座架限制
         self.gestell_analyzer = GestellAnalyzer()
@@ -87,20 +88,20 @@ class CTTeam:
         # 组织的目标应该让每个人的工作与组织整体目标对齐
         # Agent 是否知道自己的任务如何贡献整体目标？
         self.mbo_system = MBOTargetAlignment()
-        
+
         # ── Drucker 有效管理者: 管理者有效性反馈 ─────────────────
         # 管理者的有效性不是天生的，是可以学会的
         # 需要具体的反馈数据来改进管理者表现
         self.manager_effectiveness: Dict[str, ManagerEffectivenessFeedback] = {}
-        
+
         # ── Fayol 五项管理功能覆盖分析 ───────────────────────────
         self.fayol_coverage = FayolManagementCoverage()
-        
+
         # ── Senge 系统反馈回路追踪 ───────────────────────────────
         # 整体大于部分之和 - 系统的行为来自各部分之间的反馈回路
         # 识别增强回路和平衡回路
         self.senge_feedback_loops: Dict[str, FeedbackLoop] = {}
-        
+
         # ── Senge 组织学习引擎 ───────────────────────────────────
         # "学习"必须嵌入组织运作中
         # Agent 在每次任务中是否在真正学习，还是只在执行？
@@ -110,8 +111,10 @@ class CTTeam:
         # 【Bengio注意力可视化】追踪每个 agent 的"注意力"分布
         # 即每个 agent 在关注谁（哪个 agent 或任务）
         # 用于解释 multi-agent 协调中每个 agent 在"看什么"
-        self._agent_attention: Dict[str, Dict[str, float]] = {}  # agent_name -> {target: attention_weight}
-        
+        self._agent_attention: Dict[
+            str, Dict[str, float]
+        ] = {}  # agent_name -> {target: attention_weight}
+
         # 消息传递的注意力权重（基于消息类型和频率）
         # 【Bengio注意力可视化】不同类型的消息有不同的注意力权重
         self._message_attention_weights: Dict[str, float] = {
@@ -122,16 +125,16 @@ class CTTeam:
             "broadcast": 0.2,
             "direct": 0.6,
             "socratic_question": 0.8,  # 苏格拉底诘问需要高度关注
-            "blind_spot_report": 0.7,   # 盲区报告需要关注
-            "genealogy_trace": 0.6,    # 系谱追踪
+            "blind_spot_report": 0.7,  # 盲区报告需要关注
+            "genealogy_trace": 0.6,  # 系谱追踪
         }
-        
+
         # 注意力衰减因子（时间越久注意力越低）
         self._attention_decay_factor: float = 0.95
-        
+
         # 上一次更新注意力的时间戳
         self._last_attention_update: float = time.time()
-        
+
         # ── Marcuse 单向度修复：全局自动化退出开关 ─────────────────────
         # 7个自动化功能（NightWatch/auto-retry/DreamNet推送/CTTeam冲突协议/
         # CircuitBreaker/AgentSafety BLOCK/混合搜索）默认开启
@@ -143,7 +146,7 @@ class CTTeam:
         # 灵感储备制：不是推送，是储备
         self._insight_reserve: list[dict] = []
         self._insight_reserve_limit = 50  # 最多储备50条
-        
+
         self._load_state()
 
     # ══════════════════════════════════════════════════════════════
@@ -209,11 +212,11 @@ class CTTeam:
         )
         self.agents[name] = agent
         self.hierarchy.add_node(name, parent_name)
-        
+
         # ── 注册 agent 的有限理性边界 ───────────────────────────
         # Simon: 每个 agent 都有有限的知识边界
         self.bounded_rationality.register_agent(name)
-        
+
         self._save_state()
         return agent
 
@@ -250,45 +253,45 @@ class CTTeam:
     ):
         """
         【Bengio注意力可视化】
-        
+
         当消息发送时，更新发送者和接收者的注意力分布。
         这模拟了人类的注意力机制：
         - 发送者将注意力投向接收者（因为我需要你的帮助/回应）
         - 接收者将注意力投向发送者（因为有人在跟我说话）
-        
+
         注意力权重基于消息类型：重要的消息类型（如SOCRATIC_QUESTION）权重更高。
         """
         if from_agent not in self._agent_attention:
             self._agent_attention[from_agent] = {}
         if to_agent not in self._agent_attention:
             self._agent_attention[to_agent] = {}
-        
+
         # 获取消息类型的注意力权重
         msg_weight = self._message_attention_weights.get(message_type.value, 0.3)
-        
+
         # 发送者对接收者的注意力 += 消息权重（发送者主动关注接收者）
         current_from_attention = self._agent_attention[from_agent].get(to_agent, 0.0)
         self._agent_attention[from_agent][to_agent] = min(1.0, current_from_attention + msg_weight)
-        
+
         # 接收者对发送者的注意力 += 消息权重（接收者被动关注发送者）
         current_to_attention = self._agent_attention[to_agent].get(from_agent, 0.0)
         self._agent_attention[to_agent][from_agent] = min(1.0, current_to_attention + msg_weight)
-        
+
         self._last_attention_update = time.time()
-    
+
     def _apply_attention_decay(self):
         """
         【Bengio注意力可视化】
-        
+
         对所有注意力应用时间衰减。
         随着时间推移，如果不更新注意力，权重会逐渐降低。
         """
         time_elapsed = time.time() - self._last_attention_update
         if time_elapsed < 1.0:
             return  # 不到1秒，不衰减
-        
-        decay_rate = self._attention_decay_factor ** time_elapsed
-        
+
+        decay_rate = self._attention_decay_factor**time_elapsed
+
         for agent_name in self._agent_attention:
             for target_name in list(self._agent_attention[agent_name].keys()):
                 old_weight = self._agent_attention[agent_name][target_name]
@@ -297,16 +300,16 @@ class CTTeam:
                     del self._agent_attention[agent_name][target_name]
                 else:
                     self._agent_attention[agent_name][target_name] = new_weight
-        
+
         self._last_attention_update = time.time()
-    
+
     def get_agent_attention(self, agent_name: str) -> Dict[str, float]:
         """
         【Bengio注意力可视化】
-        
+
         获取某个 agent 的注意力分布（即它在关注谁）。
         返回一个字典：{target: attention_weight}
-        
+
         可用于可视化解释：
         - 这个 agent 当前最关注哪个 agent
         - 是否有 agent 被完全忽略
@@ -314,20 +317,20 @@ class CTTeam:
         """
         if agent_name not in self._agent_attention:
             return {}
-        
+
         self._apply_attention_decay()
-        
+
         # 排序返回（按注意力权重降序）
         attention = self._agent_attention[agent_name]
         return dict(sorted(attention.items(), key=lambda x: x[1], reverse=True))
-    
+
     def get_attention_heatmap(self) -> Dict[str, Dict[str, float]]:
         """
         【Bengio注意力可视化】
-        
+
         获取所有 agent 的注意力热力图。
         返回：{agent_name: {target: weight}}
-        
+
         可用于：
         - 可视化整个系统的注意力分布
         - 识别注意力孤岛（不被任何 agent 关注的 agent）
@@ -335,20 +338,20 @@ class CTTeam:
         """
         self._apply_attention_decay()
         return dict(self._agent_attention)
-    
+
     def get_attention_stats(self) -> dict:
         """
         【Bengio注意力可视化】
-        
+
         获取注意力分布的统计信息。
         """
         self._apply_attention_decay()
-        
+
         total_edges = 0
         weighted_sum = 0.0
         max_weight = 0.0
         max_weight_pair = ("", "")
-        
+
         for agent_name, attention in self._agent_attention.items():
             for target_name, weight in attention.items():
                 total_edges += 1
@@ -356,9 +359,9 @@ class CTTeam:
                 if weight > max_weight:
                     max_weight = weight
                     max_weight_pair = (agent_name, target_name)
-        
+
         avg_weight = weighted_sum / total_edges if total_edges > 0 else 0.0
-        
+
         return {
             "total_attention_edges": total_edges,
             "average_attention_weight": round(avg_weight, 3),
@@ -401,15 +404,17 @@ class CTTeam:
         """获取任务"""
         return self.tasks.get(task_id)
 
-    def assign_task(self, task_id: str, agent_name: str, required_domains: List[str] = None) -> bool:
+    def assign_task(
+        self, task_id: str, agent_name: str, required_domains: List[str] = None
+    ) -> bool:
         """分配任务给 Agent
-        
+
         Simon 有限理性：任务分配应考虑 agent 的知识边界
         如果 agent 声明不知道某领域，应警告或重新分配
         """
         task = self.tasks.get(task_id)
         agent = self.agents.get(agent_name)
-        
+
         if task and agent:
             # ── Simon 有限理性检查 ────────────────────────────────
             if required_domains:
@@ -431,7 +436,7 @@ class CTTeam:
                             reason=f"任务分配 '{task.title}' 需要但缺少: {missing}",
                             task_id=task_id,
                         )
-            
+
             task.assign_to(agent_name)
             agent.assign_task(task_id)
             self._save_state()
@@ -480,7 +485,7 @@ class CTTeam:
         genealogy_trace: Optional[dict] = None,
     ) -> Optional[CTMessage]:
         """发送消息，支持柏拉图洞穴盲区汇报和尼采系谱学追踪
-        
+
         Wiener 控制论：消息发送后需要确认回执构成完整反馈回路
         """
         # 先发送消息
@@ -493,11 +498,12 @@ class CTTeam:
             blind_spot_report=blind_spot_report,
             genealogy_trace=genealogy_trace,
         )
-        
+
         # ── Wiener: 创建确认回执 ─────────────────────────────────
         # 没有确认的发送只是噪音，不是真正的控制
         if msg:
             import hashlib
+
             content_hash = hashlib.md5(content.encode()).hexdigest()[:8]
             self.feedback_loop.send_with_ack(
                 message_id=msg.id,
@@ -505,14 +511,14 @@ class CTTeam:
                 to_agent=to_agent,
                 content_hash=content_hash,
             )
-        
+
         # ── Bengio 注意力可视化：更新注意力分布 ──────────────────────
         self._update_attention_on_message(
             from_agent=from_agent,
             to_agent=to_agent,
             message_type=message_type,
         )
-        
+
         return msg
 
     def broadcast(
@@ -525,7 +531,7 @@ class CTTeam:
         genealogy_trace: Optional[dict] = None,
     ) -> Optional[CTMessage]:
         """广播消息，支持柏拉图洞穴盲区汇报和尼采系谱学追踪
-        
+
         Wiener 控制论：广播也需要确认回执（来自各接收者的确认）
         """
         msg = self.inbox.broadcast(
@@ -536,10 +542,11 @@ class CTTeam:
             blind_spot_report=blind_spot_report,
             genealogy_trace=genealogy_trace,
         )
-        
+
         # ── Wiener: 广播也需要确认 ───────────────────────────────
         if msg:
             import hashlib
+
             content_hash = hashlib.md5(content.encode()).hexdigest()[:8]
             # 广播消息需要所有 agent 确认
             for agent_name in self.agents.keys():
@@ -550,7 +557,7 @@ class CTTeam:
                         to_agent=agent_name,
                         content_hash=content_hash,
                     )
-        
+
         # ── Bengio 注意力可视化：广播者对所有接收者更新注意力 ──────────
         for agent_name in self.agents.keys():
             if agent_name != from_agent:
@@ -559,7 +566,7 @@ class CTTeam:
                     to_agent=agent_name,
                     message_type=message_type,
                 )
-        
+
         return msg
 
     def get_messages(
@@ -569,13 +576,15 @@ class CTTeam:
         message_type: Optional[MessageType] = None,
     ) -> List[CTMessage]:
         """获取消息，支持按消息类型过滤（包括 SOCRATIC_QUESTION、BLIND_SPOT_REPORT、GENEALOGY_TRACE）"""
-        return self.inbox.get_messages(agent_name=agent_name, unread_only=unread_only, message_type=message_type)
+        return self.inbox.get_messages(
+            agent_name=agent_name, unread_only=unread_only, message_type=message_type
+        )
 
     # ==================== Status & Utilities ====================
 
     def get_status(self) -> dict:
         """获取团队状态
-        
+
         包含 Wiener 控制论反馈回路健康状态
         """
         status = {
@@ -587,7 +596,9 @@ class CTTeam:
             "tasks": {
                 "total": len(self.tasks),
                 "completed": sum(1 for t in self.tasks.values() if t.state == TaskState.COMPLETED),
-                "in_progress": sum(1 for t in self.tasks.values() if t.state == TaskState.IN_PROGRESS),
+                "in_progress": sum(
+                    1 for t in self.tasks.values() if t.state == TaskState.IN_PROGRESS
+                ),
             },
             "inbox": {
                 "total": len(self.inbox.messages),
@@ -596,13 +607,16 @@ class CTTeam:
             # ── Wiener 控制论反馈回路健康状态 ─────────────────────
             "cybernetic_feedback": {
                 "pending_acks": self.feedback_loop.get_pending_acks_count(),
-                "health": self.feedback_loop.get_cybernetic_report().get("feedback_loop_health", "unknown"),
+                "health": self.feedback_loop.get_cybernetic_report().get(
+                    "feedback_loop_health", "unknown"
+                ),
             },
             # ── Simon 有限理性状态 ────────────────────────────────
             "bounded_rationality": {
                 "tracked_agents": len(self.bounded_rationality.knowledge_boundaries),
                 "uncertain_agents": sum(
-                    1 for kb in self.bounded_rationality.knowledge_boundaries.values()
+                    1
+                    for kb in self.bounded_rationality.knowledge_boundaries.values()
                     if kb.confidence_level < 0.8
                 ),
             },
@@ -625,7 +639,7 @@ class CTTeam:
     ) -> str:
         """
         【Drucker MBO】创建团队目标
-        
+
         组织的目标应该让每个人的工作与组织整体目标对齐。
         每个目标需要：
         1. 清晰的成功标准
@@ -633,6 +647,7 @@ class CTTeam:
         3. 时间线
         """
         import uuid
+
         objective_id = f"obj_{uuid.uuid4().hex[:8]}"
         objective = TeamObjective(
             objective_id=objective_id,
@@ -648,7 +663,7 @@ class CTTeam:
     def align_task_to_objective(self, task_id: str, objective_id: str) -> bool:
         """
         【Drucker MBO】将任务对齐到目标
-        
+
         问：Agent 是否知道自己的任务如何贡献整体目标？
         """
         success = self.mbo_system.align_task_to_objective(task_id, objective_id)
@@ -659,7 +674,7 @@ class CTTeam:
     def get_agent_contribution(self, agent_name: str) -> dict:
         """
         【Drucker MBO】获取 Agent 对整体目标的贡献
-        
+
         回答：Agent 的任务如何贡献整体目标？
         """
         return self.mbo_system.get_agent_contribution(agent_name)
@@ -675,7 +690,7 @@ class CTTeam:
     ) -> ManagerEffectivenessFeedback:
         """
         【Drucker 有效管理者】记录管理者有效性反馈
-        
+
         管理者的有效性不是天生的，是可以学会的。
         需要具体的反馈数据来改进管理者表现。
         """
@@ -700,7 +715,7 @@ class CTTeam:
     def analyze_fayol_coverage(self) -> dict:
         """
         【Fayol 五项管理功能】覆盖分析
-        
+
         计划 (Planning): 目标设定、战略制定
         组织 (Organizing): 资源分配、结构设计
         指挥 (Commanding): 指示、指导、领导
@@ -708,30 +723,28 @@ class CTTeam:
         控制 (Controlling): 监控、纠正偏差
         """
         coverage = self.fayol_coverage
-        
+
         # 检查计划功能
-        if hasattr(self, 'mbo_system') and self.mbo_system.team_objectives:
+        if hasattr(self, "mbo_system") and self.mbo_system.team_objectives:
             coverage.planning_coverage = min(1.0, 0.4 + len(self.mbo_system.team_objectives) * 0.1)
-        
+
         # 检查组织功能
-        if hasattr(self, 'bounded_rationality'):
+        if hasattr(self, "bounded_rationality"):
             coverage.organizing_coverage = 0.7  # 有资源分配
-        
+
         # 检查指挥功能 - 需要有 coordinator agent
-        if hasattr(self, 'hierarchy'):
-            has_coordinator = any(
-                a.agent_type == 'coordinator' for a in self.agents.values()
-            )
+        if hasattr(self, "hierarchy"):
+            has_coordinator = any(a.agent_type == "coordinator" for a in self.agents.values())
             coverage.commanding_coverage = 0.8 if has_coordinator else 0.3
-        
+
         # 检查协调功能
-        if hasattr(self, 'collaboration_protocol'):
+        if hasattr(self, "collaboration_protocol"):
             coverage.coordinating_coverage = 0.75
-        
+
         # 检查控制功能
-        if hasattr(self, 'feedback_loop'):
+        if hasattr(self, "feedback_loop"):
             coverage.controlling_coverage = 0.7
-        
+
         # 识别缺失功能
         coverage.missing_functions = []
         if coverage.planning_coverage < 0.5:
@@ -740,22 +753,18 @@ class CTTeam:
             coverage.missing_functions.append("commanding")
         if coverage.controlling_coverage < 0.5:
             coverage.missing_functions.append("controlling")
-        
+
         # 改进建议
         coverage.improvement_suggestions = []
         if coverage.planning_coverage < 0.7:
-            coverage.improvement_suggestions.append(
-                "建议：建立更正式的目标设定和战略规划流程"
-            )
+            coverage.improvement_suggestions.append("建议：建立更正式的目标设定和战略规划流程")
         if coverage.commanding_coverage < 0.7:
             coverage.improvement_suggestions.append(
                 "建议：明确 coordinator agent 的领导角色和指令传达机制"
             )
         if coverage.controlling_coverage < 0.7:
-            coverage.improvement_suggestions.append(
-                "建议：增强偏差检测和纠正机制"
-            )
-        
+            coverage.improvement_suggestions.append("建议：增强偏差检测和纠正机制")
+
         return coverage.analyze_coverage()
 
     def register_feedback_loop(
@@ -768,13 +777,14 @@ class CTTeam:
     ) -> str:
         """
         【Senge 系统思维】注册反馈回路
-        
+
         整体大于部分之和 - 系统的行为来自各部分之间的反馈回路。
         识别增强回路和平衡回路：
         - 增强回路 (Reinforcing): 放大变化，如成功带来更多成功
         - 平衡回路 (Balancing): 趋于稳定目标，如 thermostat
         """
         import uuid
+
         loop_id = f"loop_{uuid.uuid4().hex[:8]}"
         loop = FeedbackLoop(
             loop_id=loop_id,
@@ -799,14 +809,14 @@ class CTTeam:
     def get_senge_feedback_report(self) -> dict:
         """
         【Senge 系统思维】反馈回路分析报告
-        
+
         检查是否存在隐藏的反馈回路：
         - 增强回路可能导致指数级增长或崩溃
         - 平衡回路可能导致振荡或稳定
         """
         reinforcing = []
         balancing = []
-        
+
         for loop in self.senge_feedback_loops.values():
             loop_info = {
                 "loop_id": loop.loop_id,
@@ -819,7 +829,7 @@ class CTTeam:
                 reinforcing.append(loop_info)
             else:
                 balancing.append(loop_info)
-        
+
         return {
             "total_loops": len(self.senge_feedback_loops),
             "reinforcing_loops": reinforcing,
@@ -830,16 +840,16 @@ class CTTeam:
     def _identify_feedback_risks(self, reinforcing: List, balancing: List) -> List[str]:
         """识别反馈回路潜在风险"""
         risks = []
-        
+
         # 强增强回路无平衡回路可能失控
-        strong_reinforcing = [r for r in reinforcing if r['strength'] > 1.5]
+        strong_reinforcing = [r for r in reinforcing if r["strength"] > 1.5]
         if strong_reinforcing and not balancing:
             risks.append("存在强增强回路但缺乏平衡回路，可能导致失控增长")
-        
+
         # 多个平衡回路可能造成振荡
         if len(balancing) > 3:
             risks.append("多个平衡回路可能造成系统振荡")
-        
+
         return risks
 
     def record_organizational_learning(
@@ -854,7 +864,7 @@ class CTTeam:
     ) -> str:
         """
         【Senge 第五项修炼】记录组织学习
-        
+
         "学习"必须嵌入组织运作中。
         问：Agent 在每次任务中是否在真正学习，还是只在执行？
         """
@@ -888,7 +898,7 @@ class CTTeam:
     def get_organizational_health_report(self) -> dict:
         """
         综合组织健康度报告
-        
+
         整合 Drucker MBO + Fayol + Senge 三个维度的分析
         """
         return {
@@ -904,23 +914,24 @@ class CTTeam:
 
     def wait_all(self, timeout: int = 3600, check_deadlock: bool = True) -> dict:
         """等待所有 Agent 完成
-        
+
         Simon 有限理性：无限等待违反有限理性原则
         - 添加了渐进式警告
         - 可选的死锁检测
         - 违反有限理性时抛出异常
         """
         import logging
+
         start = time.time()
         last_warning_time = start
-        
+
         while time.time() - start < timeout:
             states = [a.state for a in self.agents.values()]
-            
+
             # 检查是否全部完成
             if all(s in (AgentState.COMPLETED, AgentState.FAILED) for s in states):
                 return self.get_status()
-            
+
             # ── 渐进式警告：避免无限等待 ───────────────────────────
             elapsed = time.time() - start
             if elapsed > 60 and time.time() - last_warning_time > 60:
@@ -929,17 +940,15 @@ class CTTeam:
                     f" - 可能存在死锁或任务卡住"
                 )
                 last_warning_time = time.time()
-                
+
                 # ── 可选的死锁检测 ───────────────────────────────
                 if check_deadlock:
                     conflicts = self.collaboration_protocol.detect_conflicts()
                     if conflicts:
-                        logging.error(
-                            f"[Bounded Rationality] 检测到 {len(conflicts)} 个潜在冲突"
-                        )
-            
+                        logging.error(f"[Bounded Rationality] 检测到 {len(conflicts)} 个潜在冲突")
+
             time.sleep(1)
-        
+
         # ── 超时：违反有限理性 ───────────────────────────────────
         elapsed = time.time() - start
         logging.error(
@@ -979,8 +988,12 @@ class CTTeam:
                     state = json.load(f)
 
                 self.name = state.get("name", self.name)
-                self.agents = {name: CTAgent.from_dict(data) for name, data in state.get("agents", {}).items()}
-                self.tasks = {tid: CTTask.from_dict(data) for tid, data in state.get("tasks", {}).items()}
+                self.agents = {
+                    name: CTAgent.from_dict(data) for name, data in state.get("agents", {}).items()
+                }
+                self.tasks = {
+                    tid: CTTask.from_dict(data) for tid, data in state.get("tasks", {}).items()
+                }
                 self.inbox = CTInbox.from_dict(state.get("inbox", {}))
                 self.hierarchy = AgentHierarchy.from_dict(state.get("hierarchy", {}))
             except Exception:
@@ -998,8 +1011,13 @@ class CTTeam:
     def from_dict(cls, data: dict, storage_path: Optional[Path] = None) -> "CTTeam":
         """从字典创建"""
         team = cls(data.get("name", "unknown"), storage_path=storage_path)
-        team.agents = {name: CTAgent.from_dict(agent_data) for name, agent_data in data.get("agents", {}).items()}
-        team.tasks = {tid: CTTask.from_dict(task_data) for tid, task_data in data.get("tasks", {}).items()}
+        team.agents = {
+            name: CTAgent.from_dict(agent_data)
+            for name, agent_data in data.get("agents", {}).items()
+        }
+        team.tasks = {
+            tid: CTTask.from_dict(task_data) for tid, task_data in data.get("tasks", {}).items()
+        }
         return team
 
 
@@ -1021,26 +1039,29 @@ import uuid as _uuid
 
 class ConflictType(Enum):
     """冲突类型"""
-    TASK_OVERLAP = "task_overlap"       # 任务重叠（两个 agent 争抢同一任务）
-    RESOURCE_CONTENTION = "resource"    # 资源争用（同时需要同一资源）
-    PRIORITY_DISPUTE = "priority"       # 优先级争议
-    GOAL_MISMATCH = "goal_mismatch"    # 目标不一致
-    DEADLOCK = "deadlock"              # 死锁（相互等待）
+
+    TASK_OVERLAP = "task_overlap"  # 任务重叠（两个 agent 争抢同一任务）
+    RESOURCE_CONTENTION = "resource"  # 资源争用（同时需要同一资源）
+    PRIORITY_DISPUTE = "priority"  # 优先级争议
+    GOAL_MISMATCH = "goal_mismatch"  # 目标不一致
+    DEADLOCK = "deadlock"  # 死锁（相互等待）
 
 
 class NegotiationStatus(Enum):
     """谈判状态"""
-    PROPOSED = "proposed"              # 方案已提出
-    ACCEPTED = "accepted"              # 接受
-    REJECTED = "rejected"              # 拒绝
-    COUNTERED = "countered"            # 反提案
-    WITHDRAWN = "withdrawn"            # 撤回
-    EXPIRED = "expired"                # 超时
+
+    PROPOSED = "proposed"  # 方案已提出
+    ACCEPTED = "accepted"  # 接受
+    REJECTED = "rejected"  # 拒绝
+    COUNTERED = "countered"  # 反提案
+    WITHDRAWN = "withdrawn"  # 撤回
+    EXPIRED = "expired"  # 超时
 
 
 @dataclass
 class ConflictRecord:
     """冲突记录"""
+
     id: str
     conflict_type: ConflictType
     agents_involved: list[str]
@@ -1055,6 +1076,7 @@ class ConflictRecord:
 @dataclass
 class NegotiationProposal:
     """谈判提案"""
+
     id: str
     conflict_id: str
     proposer: str
@@ -1231,12 +1253,14 @@ class RuleGenealogyTracker:
         for ancestor_id in rule.ancestors:
             anc = self.policies.get(ancestor_id)
             if anc:
-                ancestor_chain.append({
-                    "rule_id": anc.rule_id,
-                    "created_at": anc.created_at,
-                    "created_by": anc.created_by,
-                    "reason": anc.reason,
-                })
+                ancestor_chain.append(
+                    {
+                        "rule_id": anc.rule_id,
+                        "created_at": anc.created_at,
+                        "created_by": anc.created_by,
+                        "reason": anc.reason,
+                    }
+                )
 
         return {
             "rule_id": rule.rule_id,
@@ -1268,8 +1292,7 @@ class RuleGenealogyTracker:
             "active_rules": len([r for r in self.policies.values() if not r.is_overridden]),
             "overridden_rules": len([r for r in self.policies.values() if r.is_overridden]),
             "rules": {
-                rule_id: self.get_genealogy(rule_id)
-                for rule_id, rule in self.policies.items()
+                rule_id: self.get_genealogy(rule_id) for rule_id, rule in self.policies.items()
             },
         }
 
@@ -1296,6 +1319,7 @@ class SocraticQuestion:
     - answered:       是否已回答
     - answer:         回答内容
     """
+
     question_id: str = field(default_factory=lambda: f"sq_{_uuid.uuid4().hex[:8]}")
     from_agent: str = ""
     to_agent: str = ""
@@ -1471,7 +1495,7 @@ class CollaborationProtocol:
         # 冲突1：任务重叠（同一任务被多个 agent 认领）
         task_agents: dict[str, list[str]] = {}
         for agent in self.team.agents.values():
-            task_id = getattr(agent, 'task_id', None)
+            task_id = getattr(agent, "task_id", None)
             if task_id:
                 if task_id not in task_agents:
                     task_agents[task_id] = []
@@ -1500,13 +1524,15 @@ class CollaborationProtocol:
                 for msg in msgs:
                     if msg.from_agent == a2_name:
                         # 发现 a2 向 a1 发过消息，a1 可能也在等 a2
-                        detected.append(ConflictRecord(
-                            id=f"conflict_deadlock_{a1_name}_{a2_name}",
-                            conflict_type=ConflictType.DEADLOCK,
-                            agents_involved=[a1_name, a2_name],
-                            description=f"可能死锁: {a1_name} ↔ {a2_name}",
-                            severity=8,
-                        ))
+                        detected.append(
+                            ConflictRecord(
+                                id=f"conflict_deadlock_{a1_name}_{a2_name}",
+                                conflict_type=ConflictType.DEADLOCK,
+                                agents_involved=[a1_name, a2_name],
+                                description=f"可能死锁: {a1_name} ↔ {a2_name}",
+                                severity=8,
+                            )
+                        )
 
         return detected
 
@@ -1618,7 +1644,11 @@ class CollaborationProtocol:
                 description=f"反提案: {proposal.description}",
                 proposed_actions=counter_actions,
             )
-            return {"status": "countered", "original_id": proposal_id, "new_proposal_id": new_proposal.id}
+            return {
+                "status": "countered",
+                "original_id": proposal_id,
+                "new_proposal_id": new_proposal.id,
+            }
 
         return {"status": "unknown_response"}
 
@@ -1708,7 +1738,9 @@ class CollaborationProtocol:
                 }
                 for c in sorted(resolved, key=lambda x: -x.resolved_at)[:10]
             ],
-            "active_negotiations": len([n for n in self.negotiations.values() if n.status == NegotiationStatus.PROPOSED]),
+            "active_negotiations": len(
+                [n for n in self.negotiations.values() if n.status == NegotiationStatus.PROPOSED]
+            ),
             "collaboration_score": self._compute_collaboration_score(unresolved, resolved),
         }
 

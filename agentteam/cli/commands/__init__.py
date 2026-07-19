@@ -28,7 +28,14 @@ from agentteam.cli.commands.lifecycle import app as lifecycle_app
 from agentteam.cli.commands.workspace import app as workspace_app
 from agentteam.cli.commands.template import app as template_app
 from agentteam.cli.commands.metrics import app as metrics_app, cost_app, insights_app, dag_app
-from agentteam.cli.commands.alert import app as alert_app, alert_app, audit_app, drift_app, role_app, review_app
+from agentteam.cli.commands.alert import (
+    app as alert_app,
+    alert_app,
+    audit_app,
+    drift_app,
+    role_app,
+    review_app,
+)
 from agentteam.cli.commands.session import app as session_app
 
 # Re-export helper functions for backward compatibility
@@ -38,6 +45,7 @@ from agentteam.cli.commands.helpers import _deliver_to_running_agent, _broadcast
 # (Python prefers this package over the commands.py shim, so we must expose app here.)
 # 2026-06-18 fix: 8080 DOWN, ImportError: cannot import name 'app' from 'agentteam.cli.commands'
 import typer
+
 app = typer.Typer(name="agentteam", help="Framework-agnostic multi-agent CLI", no_args_is_help=True)
 for _name, _sub in [
     ("init", init_app),

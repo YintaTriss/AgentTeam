@@ -32,24 +32,27 @@ logger = logging.getLogger(__name__)
 
 class TaskComplexity(Enum):
     """任务复杂度等级"""
-    TRIVIAL = "trivial"      # 简单任务，无需分解
-    SIMPLE = "simple"       # 简单任务，少量子任务
-    MODERATE = "moderate"   # 中等复杂度
-    COMPLEX = "complex"     # 复杂任务，多层分解
+
+    TRIVIAL = "trivial"  # 简单任务，无需分解
+    SIMPLE = "simple"  # 简单任务，少量子任务
+    MODERATE = "moderate"  # 中等复杂度
+    COMPLEX = "complex"  # 复杂任务，多层分解
     VERY_COMPLEX = "very_complex"  # 极复杂任务
 
 
 class DecompositionStrategy(Enum):
     """分解策略"""
-    FLAT = "flat"           # 扁平分解，并行执行
+
+    FLAT = "flat"  # 扁平分解，并行执行
     HIERARCHICAL = "hierarchical"  # 层级分解
-    LINEAR = "linear"       # 线性分解，顺序执行
-    ADAPTIVE = "adaptive"   # 自适应分解
+    LINEAR = "linear"  # 线性分解，顺序执行
+    ADAPTIVE = "adaptive"  # 自适应分解
 
 
 @dataclass
 class SubTask:
     """子任务定义"""
+
     id: str
     name: str
     description: str
@@ -77,6 +80,7 @@ class SubTask:
 @dataclass
 class DecompositionResult:
     """分解结果"""
+
     task_id: str
     original_task: str
     sub_tasks: List[SubTask]
@@ -102,6 +106,7 @@ class DecompositionResult:
 @dataclass
 class ExecutionRecord:
     """执行记录"""
+
     task_id: str
     sub_task_count: int
     actual_duration: float  # 分钟
@@ -127,12 +132,15 @@ class ExecutionRecord:
 @dataclass
 class DecomposerStats:
     """分解器统计信息"""
+
     total_tasks: int = 0
     successful_tasks: int = 0
     failed_tasks: int = 0
     avg_subtask_count: float = 0.0
     avg_duration: float = 0.0
-    strategy_effectiveness: Dict[str, float] = field(default_factory=dict)  # strategy -> avg_feedback
+    strategy_effectiveness: Dict[str, float] = field(
+        default_factory=dict
+    )  # strategy -> avg_feedback
     complexity_accuracy: Dict[str, float] = field(default_factory=dict)  # complexity -> accuracy
     recent_executions: List[Dict] = field(default_factory=list)
     override_active: bool = False
@@ -210,24 +218,52 @@ class AdaptiveDecomposer:
         # 复杂度关键词
         self._complexity_keywords = {
             TaskComplexity.TRIVIAL: [
-                r"简单", r"翻译", r"格式化", r"检查", r"验证",
-                r"简单修改", r"typo", r"注释",
+                r"简单",
+                r"翻译",
+                r"格式化",
+                r"检查",
+                r"验证",
+                r"简单修改",
+                r"typo",
+                r"注释",
             ],
             TaskComplexity.SIMPLE: [
-                r"实现", r"添加", r"创建", r"编写", r"生成",
-                r"一个", r"单个", r"基础",
+                r"实现",
+                r"添加",
+                r"创建",
+                r"编写",
+                r"生成",
+                r"一个",
+                r"单个",
+                r"基础",
             ],
             TaskComplexity.MODERATE: [
-                r"系统", r"模块", r"功能", r"多个", r"集成",
-                r"优化", r"重构", r"迁移",
+                r"系统",
+                r"模块",
+                r"功能",
+                r"多个",
+                r"集成",
+                r"优化",
+                r"重构",
+                r"迁移",
             ],
             TaskComplexity.COMPLEX: [
-                r"复杂", r"分布式", r"微服务", r"架构", r"平台",
-                r"全栈", r"端到端", r"大型",
+                r"复杂",
+                r"分布式",
+                r"微服务",
+                r"架构",
+                r"平台",
+                r"全栈",
+                r"端到端",
+                r"大型",
             ],
             TaskComplexity.VERY_COMPLEX: [
-                r"极复杂", r"人工智能", r"机器学习", r"大数据",
-                r"全新架构", r"革命性",
+                r"极复杂",
+                r"人工智能",
+                r"机器学习",
+                r"大数据",
+                r"全新架构",
+                r"革命性",
             ],
         }
 
@@ -451,12 +487,14 @@ class AdaptiveDecomposer:
         # 基于任务描述和复杂度生成子任务
         if complexity == TaskComplexity.TRIVIAL:
             # 简单任务，可能只需要一个子任务
-            sub_tasks.append(SubTask(
-                id=self._generate_subtask_id(task_id, 0),
-                name="执行任务",
-                description=original_task,
-                priority=1,
-            ))
+            sub_tasks.append(
+                SubTask(
+                    id=self._generate_subtask_id(task_id, 0),
+                    name="执行任务",
+                    description=original_task,
+                    priority=1,
+                )
+            )
         else:
             # 通用分解模式
             task_parts = self._analyze_task_structure(original_task)
@@ -464,37 +502,43 @@ class AdaptiveDecomposer:
             if len(task_parts) >= count:
                 # 直接使用分析出的结构
                 for i, part in enumerate(task_parts[:count]):
-                    sub_tasks.append(SubTask(
-                        id=self._generate_subtask_id(task_id, i),
-                        name=part.get("name", f"子任务 {i+1}"),
-                        description=part.get("description", part.get("name", "")),
-                        priority=count - i,
-                        estimated_duration=part.get("duration"),
-                        dependencies=part.get("dependencies", []),
-                        skill_requirements=part.get("skills", []),
-                    ))
+                    sub_tasks.append(
+                        SubTask(
+                            id=self._generate_subtask_id(task_id, i),
+                            name=part.get("name", f"子任务 {i + 1}"),
+                            description=part.get("description", part.get("name", "")),
+                            priority=count - i,
+                            estimated_duration=part.get("duration"),
+                            dependencies=part.get("dependencies", []),
+                            skill_requirements=part.get("skills", []),
+                        )
+                    )
             else:
                 # 需要补充子任务
                 for i, part in enumerate(task_parts):
-                    sub_tasks.append(SubTask(
-                        id=self._generate_subtask_id(task_id, i),
-                        name=part.get("name", f"子任务 {i+1}"),
-                        description=part.get("description", part.get("name", "")),
-                        priority=count - i,
-                        estimated_duration=part.get("duration"),
-                        dependencies=part.get("dependencies", []),
-                        skill_requirements=part.get("skills", []),
-                    ))
+                    sub_tasks.append(
+                        SubTask(
+                            id=self._generate_subtask_id(task_id, i),
+                            name=part.get("name", f"子任务 {i + 1}"),
+                            description=part.get("description", part.get("name", "")),
+                            priority=count - i,
+                            estimated_duration=part.get("duration"),
+                            dependencies=part.get("dependencies", []),
+                            skill_requirements=part.get("skills", []),
+                        )
+                    )
 
                 # 补充剩余子任务
                 remaining = count - len(task_parts)
                 for i in range(remaining):
-                    sub_tasks.append(SubTask(
-                        id=self._generate_subtask_id(task_id, len(task_parts) + i),
-                        name=f"步骤 {len(task_parts) + i + 1}",
-                        description="执行相关步骤",
-                        priority=count - len(task_parts) - i,
-                    ))
+                    sub_tasks.append(
+                        SubTask(
+                            id=self._generate_subtask_id(task_id, len(task_parts) + i),
+                            name=f"步骤 {len(task_parts) + i + 1}",
+                            description="执行相关步骤",
+                            priority=count - len(task_parts) - i,
+                        )
+                    )
 
         # 设置依赖关系（基于优先级）
         self._resolve_dependencies(sub_tasks)
@@ -530,22 +574,42 @@ class AdaptiveDecomposer:
         for pattern, suggested_parts in patterns:
             if re.search(pattern, task, re.IGNORECASE):
                 for i, part_name in enumerate(suggested_parts):
-                    parts.append({
-                        "name": part_name,
-                        "description": f"执行 {part_name} 相关工作",
-                        "duration": None,
-                        "dependencies": [] if i == 0 else [suggested_parts[i-1]],
-                        "skills": [],
-                    })
+                    parts.append(
+                        {
+                            "name": part_name,
+                            "description": f"执行 {part_name} 相关工作",
+                            "duration": None,
+                            "dependencies": [] if i == 0 else [suggested_parts[i - 1]],
+                            "skills": [],
+                        }
+                    )
                 break
 
         # 如果没有匹配到模式，按语义分割
         if not parts:
             # 简单分割为理解、计划、执行三个阶段
             parts = [
-                {"name": "理解需求", "description": "理解任务需求和目标", "duration": None, "dependencies": [], "skills": []},
-                {"name": "制定计划", "description": "制定执行计划", "duration": None, "dependencies": ["理解需求"], "skills": []},
-                {"name": "执行任务", "description": "执行主要任务", "duration": None, "dependencies": ["制定计划"], "skills": []},
+                {
+                    "name": "理解需求",
+                    "description": "理解任务需求和目标",
+                    "duration": None,
+                    "dependencies": [],
+                    "skills": [],
+                },
+                {
+                    "name": "制定计划",
+                    "description": "制定执行计划",
+                    "duration": None,
+                    "dependencies": ["理解需求"],
+                    "skills": [],
+                },
+                {
+                    "name": "执行任务",
+                    "description": "执行主要任务",
+                    "duration": None,
+                    "dependencies": ["制定计划"],
+                    "skills": [],
+                },
             ]
 
         return parts
@@ -594,13 +658,17 @@ class AdaptiveDecomposer:
 
             # 子任务数量
             if forced_subtask_count:
-                subtask_count = max(self._min_subtasks, min(self._max_subtasks, forced_subtask_count))
+                subtask_count = max(
+                    self._min_subtasks, min(self._max_subtasks, forced_subtask_count)
+                )
             else:
                 range_min, range_max = self._estimate_subtask_count(complexity)
                 subtask_count = (range_min + range_max) // 2
 
             # 生成子任务
-            sub_tasks = self._generate_subtasks(task_id, task_description, complexity, subtask_count)
+            sub_tasks = self._generate_subtasks(
+                task_id, task_description, complexity, subtask_count
+            )
 
             # 计算置信度
             confidence = 0.7  # 基础置信度
@@ -660,7 +728,9 @@ class AdaptiveDecomposer:
             total = self._stats.total_tasks
             old_avg_count = self._stats.avg_subtask_count
             old_avg_duration = self._stats.avg_duration
-            self._stats.avg_subtask_count = (old_avg_count * (total - 1) + len(result.sub_tasks)) / total
+            self._stats.avg_subtask_count = (
+                old_avg_count * (total - 1) + len(result.sub_tasks)
+            ) / total
             self._stats.avg_duration = (old_avg_duration * (total - 1) + actual_duration) / total
 
             # 更新策略效果
@@ -668,7 +738,9 @@ class AdaptiveDecomposer:
             if user_feedback is not None:
                 current_effect = self._stats.strategy_effectiveness.get(strategy_key, 0.5)
                 # 指数移动平均
-                self._stats.strategy_effectiveness[strategy_key] = current_effect * 0.7 + user_feedback * 0.3
+                self._stats.strategy_effectiveness[strategy_key] = (
+                    current_effect * 0.7 + user_feedback * 0.3
+                )
 
             # 更新复杂度准确率（简化版）
             complexity_key = result.complexity.value
@@ -746,10 +818,7 @@ class AdaptiveDecomposer:
 
             # 分析策略效果
             if self._stats.strategy_effectiveness:
-                worst_strategy = min(
-                    self._stats.strategy_effectiveness.items(),
-                    key=lambda x: x[1]
-                )
+                worst_strategy = min(self._stats.strategy_effectiveness.items(), key=lambda x: x[1])
                 if worst_strategy[1] < 0.4:
                     suggestions.append(
                         f"策略 '{worst_strategy[0]}' 效果较差 (反馈: {worst_strategy[1]:.2f})，"

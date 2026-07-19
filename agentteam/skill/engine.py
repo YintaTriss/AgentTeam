@@ -56,6 +56,7 @@ class SkillVariable:
 @dataclass
 class SkillVersion:
     """技能版本"""
+
     version: str  # 版本号 (semver)
     skill_id: str  # 关联的技能 ID
     prompt_template: Optional[str] = None
@@ -424,9 +425,7 @@ class SkillVersionManager:
                 "total_versions": total_versions,
                 "current_versions": len(self._current_versions),
                 "active_tags": len(self._tag_index),
-                "skills_with_versions": {
-                    sid: len(vs) for sid, vs in self._versions.items()
-                },
+                "skills_with_versions": {sid: len(vs) for sid, vs in self._versions.items()},
             }
 
 
@@ -489,7 +488,9 @@ class SkillEngine:
         if skill.input_variables:
             for variable in skill.input_variables:
                 if variable.default_value is not None:
-                    prompt = re.sub(r"\{\{" + re.escape(variable.name) + r"\}\}", variable.default_value, prompt)
+                    prompt = re.sub(
+                        r"\{\{" + re.escape(variable.name) + r"\}\}", variable.default_value, prompt
+                    )
 
         # 移除仍未替换的占位符（留空）
         prompt = re.sub(r"\{\{[a-zA-Z_][a-zA-Z0-9_]*\}\}", "", prompt)
@@ -501,7 +502,9 @@ class SkillEngine:
         return prompt.strip()
 
     @staticmethod
-    def parse_variables(user_input: str, variables: Optional[List[SkillVariable]]) -> Dict[str, Any]:
+    def parse_variables(
+        user_input: str, variables: Optional[List[SkillVariable]]
+    ) -> Dict[str, Any]:
         """
         从用户输入中解析 --varname=value 格式的变量
 

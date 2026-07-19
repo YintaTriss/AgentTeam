@@ -271,7 +271,9 @@ class SupervisorEngine:
     Inspired by SpectrAI supervisorPrompt.ts design.
     """
 
-    def __init__(self, team_name: str, rules: List[DecompositionRule] = None, storage_dir: str = None):
+    def __init__(
+        self, team_name: str, rules: List[DecompositionRule] = None, storage_dir: str = None
+    ):
         self.team_name = team_name
         self.provider_selector = get_provider_selector(team_name)
         self.router = get_router(team_name)
@@ -320,7 +322,7 @@ class SupervisorEngine:
             plan_data = self._serialize_plan(plan)
 
             # Atomic write: write to temp file, then rename
-            with open(temp_path, 'w', encoding='utf-8') as f:
+            with open(temp_path, "w", encoding="utf-8") as f:
                 json.dump(plan_data, f, indent=2, ensure_ascii=False)
             shutil.move(temp_path, plan_path)
 
@@ -337,7 +339,7 @@ class SupervisorEngine:
             }
             meta_path = self._get_plan_metadata_path(plan_id)
             meta_temp = f"{meta_path}.tmp.{os.getpid()}"
-            with open(meta_temp, 'w', encoding='utf-8') as f:
+            with open(meta_temp, "w", encoding="utf-8") as f:
                 json.dump(meta_data, f, indent=2, ensure_ascii=False)
             shutil.move(meta_temp, meta_path)
 
@@ -365,7 +367,7 @@ class SupervisorEngine:
             return None
 
         try:
-            with open(plan_path, 'r', encoding='utf-8') as f:
+            with open(plan_path, "r", encoding="utf-8") as f:
                 plan_data = json.load(f)
 
             return self._deserialize_plan(plan_data)
@@ -390,17 +392,17 @@ class SupervisorEngine:
 
         plans = []
         for filename in os.listdir(self._storage_dir):
-            if not filename.endswith('.meta.json'):
+            if not filename.endswith(".meta.json"):
                 continue
 
             meta_path = os.path.join(self._storage_dir, filename)
             try:
-                with open(meta_path, 'r', encoding='utf-8') as f:
+                with open(meta_path, "r", encoding="utf-8") as f:
                     meta_data = json.load(f)
 
                 # Apply status filter if specified
                 if status:
-                    plan_id = meta_data.get('plan_id', '')
+                    plan_id = meta_data.get("plan_id", "")
                     execution = self._execution_results.get(plan_id)
                     if not execution or execution.status != status:
                         continue
@@ -412,7 +414,7 @@ class SupervisorEngine:
                 continue
 
         # Sort by updated_at descending (most recent first)
-        plans.sort(key=lambda x: x.get('updated_at', ''), reverse=True)
+        plans.sort(key=lambda x: x.get("updated_at", ""), reverse=True)
         return plans
 
     def _serialize_plan(self, plan: TaskPlan) -> Dict[str, Any]:
@@ -475,7 +477,7 @@ class SupervisorEngine:
 
         count = 0
         for filename in os.listdir(self._storage_dir):
-            if not filename.endswith('.json') or filename.endswith('.meta.json'):
+            if not filename.endswith(".json") or filename.endswith(".meta.json"):
                 continue
 
             plan_id = filename[:-5]  # Remove .json extension
@@ -602,7 +604,9 @@ class SupervisorEngine:
 
         return tasks
 
-    def _select_provider_for_task(self, task: TaskItem, rule: DecompositionRule, all_tasks: List[TaskItem]) -> str:
+    def _select_provider_for_task(
+        self, task: TaskItem, rule: DecompositionRule, all_tasks: List[TaskItem]
+    ) -> str:
         """Select the best provider for a task with fallback support."""
         task_idx = int(task.id.split("-")[-1])
         preferred = rule.provider_preferences.get(task_idx, "claude")

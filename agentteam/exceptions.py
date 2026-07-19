@@ -6,40 +6,51 @@ from dataclasses import dataclass
 class AgentTeamError(Exception):
     """Base exception for all AgentTeam errors."""
 
-    pass
+    code = "AGENTTEAM_ERROR"
+
+    def __init__(self, message: str = "", *args, **kwargs):
+        self.message = message if message else type(self).__name__
+        super().__init__(self.message, *args, **kwargs)
 
 
 # Team-related errors
 class TeamNotFoundError(AgentTeamError):
     """Raised when a team is not found."""
 
-    pass
+    code = "TEAM_NOT_FOUND"
 
 
 class TeamAlreadyExistsError(AgentTeamError):
     """Raised when attempting to create a team that already exists."""
 
-    pass
+    code = "TEAM_ALREADY_EXISTS"
 
 
 # Task-related errors
 class TaskNotFoundError(AgentTeamError):
     """Raised when a task is not found."""
 
-    pass
+    code = "TASK_NOT_FOUND"
 
 
 class TaskError(AgentTeamError):
     """Raised when a task operation fails."""
 
-    pass
+    code = "TASK_ERROR"
 
 
 # Agent-related errors
 class AgentError(AgentTeamError):
     """Base exception for agent-related errors."""
 
-    def __init__(self, message: str = "", context: "ErrorContext | None" = None, **kwargs):
+    code = "AGENT_ERROR"
+
+    def __init__(
+        self,
+        message: str = "",
+        context: "ErrorContext | None" = None,
+        **kwargs,
+    ):
         super().__init__(message, **kwargs)
         self.context = context
 
@@ -47,41 +58,42 @@ class AgentError(AgentTeamError):
 class AgentNotFoundError(AgentError):
     """Raised when an agent is not found."""
 
-    pass
+    code = "AGENT_NOT_FOUND"
 
 
 class AgentSpawnError(AgentError):
     """Raised when an agent fails to spawn."""
 
-    pass
+    code = "AGENT_SPAWN_ERROR"
 
 
 # Configuration errors
 class ConfigurationError(AgentTeamError):
     """Raised when there is a configuration error."""
 
-    pass
+    code = "CONFIG_ERROR"
 
 
 # Transport errors
 class TransportError(AgentTeamError):
     """Raised when a transport operation fails."""
 
-    pass
+    code = "TRANSPORT_ERROR"
 
 
 # Authentication errors
 class AuthenticationError(AgentTeamError):
     """Raised when authentication fails."""
 
-    pass
+    code = "AUTH_ERROR"
 
 
 # Validation errors
 class ValidationError(AgentTeamError):
     """Raised when data validation fails."""
 
-    pass
+    code = "VALIDATION_ERROR"
+
 
 # Backward-compat alias (v0.5.1 用了 ConfigError，v0.7.6 改 ConfigurationError)
 ConfigError = ConfigurationError
@@ -90,32 +102,38 @@ ConfigError = ConfigurationError
 # Missing exports referenced in tests
 class ConfigNotFoundError(ConfigurationError):
     """Raised when a configuration file or key is not found."""
-    pass
+
+    code = "CONFIG_NOT_FOUND"
 
 
 class SessionNotFoundError(AgentTeamError):
     """Raised when a session is not found."""
-    pass
+
+    code = "SESSION_NOT_FOUND"
 
 
 class RateLimitError(AgentTeamError):
     """Raised when rate limit is exceeded."""
-    pass
+
+    code = "RATE_LIMIT"
 
 
 class AuthError(AuthenticationError):
     """Raised when authentication fails (alias for backward compat)."""
-    pass
+
+    code = "AUTH_ERROR"
 
 
 class PermissionDeniedError(AgentTeamError):
     """Raised when permission is denied."""
-    pass
+
+    code = "PERMISSION_DENIED"
 
 
 @dataclass
 class ErrorContext:
     """Context information for error reporting."""
+
     team_name: str | None = None
     agent_id: str | None = None
     task_id: str | None = None
@@ -149,11 +167,13 @@ class ErrorRecovery:
         """
         error_type = type(error).__name__
         ctx_str = f"{context.get('agent_id', '?')}@{context.get('team_name', '?')}"
-        self._recovery_log.append({
-            "error": error_type,
-            "context": ctx_str,
-            "timestamp": __import__("datetime").datetime.now().isoformat(),
-        })
+        self._recovery_log.append(
+            {
+                "error": error_type,
+                "context": ctx_str,
+                "timestamp": __import__("datetime").datetime.now().isoformat(),
+            }
+        )
 
         # 策略：如果是 AgentSpawnError，尝试 fallback provider
         if isinstance(error, AgentSpawnError):

@@ -13,6 +13,7 @@ from pathlib import Path
 @dataclass
 class SOPStep:
     """A single step in a Standard Operating Procedure."""
+
     step_id: str
     agent_role: str
     action: str
@@ -24,6 +25,7 @@ class SOPStep:
 @dataclass
 class SOP:
     """A Standard Operating Procedure composed of multiple steps."""
+
     name: str
     description: str
     steps: list[SOPStep] = field(default_factory=list)

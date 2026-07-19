@@ -11,15 +11,12 @@ from __future__ import annotations
 
 import logging
 import threading
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Any, Callable
 
 from agentteam.audit import AuditEventType, log_audit_event
 from agentteam.notification import NotificationManager
-
-if TYPE_CHECKING:
-    from agentteam.parser.types import ActivityEvent, ActivityEventType
-
 from agentteam.parser.output_parser import OutputParser
+from agentteam.parser.types import ActivityEvent, ActivityEventType
 
 logger = logging.getLogger(__name__)
 
@@ -129,7 +126,9 @@ class AgentTeamIntegration:
         """Set callback for WebSocket push."""
         self._websocket_push_callback = callback
 
-    def parse_output(self, session_id: str, data: str, provider_id: str | None = None) -> list[ActivityEvent]:
+    def parse_output(
+        self, session_id: str, data: str, provider_id: str | None = None
+    ) -> list[ActivityEvent]:
         """Parse output data and trigger notifications."""
         if provider_id:
             self._parser.set_provider(session_id, provider_id)
@@ -183,7 +182,9 @@ def remove_integration(team_name: str) -> None:
 
 
 # Convenience functions
-def parse_and_notify(team_name: str, session_id: str, data: str, provider_id: str | None = None) -> list[ActivityEvent]:
+def parse_and_notify(
+    team_name: str, session_id: str, data: str, provider_id: str | None = None
+) -> list[ActivityEvent]:
     """Parse output and trigger notifications using global integration."""
     integration = get_integration(team_name)
     return integration.parse_output(session_id, data, provider_id)

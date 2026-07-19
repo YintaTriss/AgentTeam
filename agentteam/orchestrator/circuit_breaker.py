@@ -25,13 +25,14 @@ T = TypeVar("T")
 
 
 class CircuitState(Enum):
-    CLOSED = "closed"       # 正常，允许请求通过
-    OPEN = "open"           # 熔断，拒绝所有请求
-    HALF_OPEN = "half_open" # 半开，只允许少量探测请求
+    CLOSED = "closed"  # 正常，允许请求通过
+    OPEN = "open"  # 熔断，拒绝所有请求
+    HALF_OPEN = "half_open"  # 半开，只允许少量探测请求
 
 
 class CircuitOpenError(Exception):
     """断路器处于 OPEN 状态时调用抛出此异常"""
+
     def __init__(self, provider: str, remaining_timeout: float):
         self.provider = provider
         self.remaining_timeout = remaining_timeout
@@ -45,12 +46,13 @@ class CircuitOpenError(Exception):
 @dataclass
 class CircuitStats:
     """断路器统计信息"""
+
     total_calls: int = 0
     successful_calls: int = 0
     failed_calls: int = 0
     rejected_calls: int = 0  # OPEN 状态下被拒绝的调用
     consecutive_successes: int = 0  # HALF_OPEN 状态下的连续成功
-    consecutive_failures: int = 0   # CLOSED 状态下的连续失败
+    consecutive_failures: int = 0  # CLOSED 状态下的连续失败
     last_failure_at: str = ""
     last_success_at: str = ""
     opened_at: str = ""
@@ -219,9 +221,7 @@ class CircuitBreaker:
         elif new_state == CircuitState.HALF_OPEN:
             self.stats.consecutive_successes = 0
 
-        logger.debug(
-            f"CircuitBreaker '{self.name}': {old_state.value} → {new_state.value}"
-        )
+        logger.debug(f"CircuitBreaker '{self.name}': {old_state.value} → {new_state.value}")
 
     def force_open(self):
         """强制打开断路器（用于管理操作）"""
@@ -247,11 +247,13 @@ class CircuitBreaker:
                     "total_calls": self.stats.total_calls,
                     "success_rate": (
                         self.stats.successful_calls / self.stats.total_calls
-                        if self.stats.total_calls > 0 else 0.0
+                        if self.stats.total_calls > 0
+                        else 0.0
                     ),
                     "failure_rate": (
                         self.stats.failed_calls / self.stats.total_calls
-                        if self.stats.total_calls > 0 else 0.0
+                        if self.stats.total_calls > 0
+                        else 0.0
                     ),
                     "rejected_calls": self.stats.rejected_calls,
                     "consecutive_failures": self.stats.consecutive_failures,
@@ -262,9 +264,7 @@ class CircuitBreaker:
             }
             if self._state == CircuitState.OPEN:
                 elapsed = time.time() - self._opened_at
-                report["recovery_in_seconds"] = max(
-                    0.0, self.recovery_timeout - elapsed
-                )
+                report["recovery_in_seconds"] = max(0.0, self.recovery_timeout - elapsed)
             return report
 
 

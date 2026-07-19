@@ -25,26 +25,31 @@ class TestSmokeBasicImports:
     def test_import_agentteam(self):
         """Test that agentteam can be imported."""
         import agentteam
+
         assert agentteam is not None
 
     def test_import_core(self):
         """Test that core module can be imported."""
         from agentteam import core
+
         assert core is not None
 
     def test_import_cli(self):
         """Test that CLI can be imported."""
         from agentteam import cli
+
         assert cli is not None
 
     def test_import_exceptions(self):
         """Test that exceptions can be imported."""
         from agentteam import exceptions
+
         assert exceptions is not None
 
     def test_import_metrics(self):
         """Test that metrics can be imported."""
         from agentteam import metrics
+
         assert metrics is not None
 
 
@@ -54,21 +59,25 @@ class TestSmokeObservability:
     def test_import_observability(self):
         """Test that observability can be imported."""
         from agentteam import observability
+
         assert observability is not None
 
     def test_import_tracer(self):
         """Test that tracer can be imported."""
         from agentteam.observability import tracer
+
         assert tracer is not None
 
     def test_import_meter(self):
         """Test that meter can be imported."""
         from agentteam.observability import meter
+
         assert meter is not None
 
     def test_import_logger(self):
         """Test that logger can be imported."""
         from agentteam.observability import get_logger
+
         assert get_logger is not None
 
     def test_tracer_span_lifecycle(self):
@@ -94,11 +103,13 @@ class TestSmokeCLICommands:
     def test_import_init_command(self):
         """Test that init command can be imported."""
         from agentteam.cli.commands import init_app
+
         assert init_app is not None
 
     def test_import_error_handler(self):
         """Test that error handler can be imported."""
         from agentteam.cli import error_handler
+
         assert error_handler is not None
 
     def test_error_handler_get_suggestions(self):
@@ -117,6 +128,7 @@ class TestSmokeMetrics:
     def test_import_prom_server(self):
         """Test that prom_server can be imported."""
         from agentteam.metrics import prom_server
+
         assert prom_server is not None
 
     def test_metrics_collector(self):
@@ -335,6 +347,7 @@ class TestSmokeConfig:
         """Test config module import."""
         try:
             from agentteam import config
+
             assert config is not None
         except ImportError:
             pytest.skip("Config module not available")
@@ -343,6 +356,7 @@ class TestSmokeConfig:
         """Test console module import."""
         try:
             from agentteam import console
+
             assert console is not None
         except ImportError:
             pytest.skip("Console module not available")

@@ -74,7 +74,7 @@ class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
 
 def _is_blocked_hostname(hostname: str) -> bool:
     """Check if a hostname is blocked for proxy requests.
-    
+
     Security note (Baudrillard simulum): This check alone is insufficient.
     It only validates the hostname format, not the actual IP the DNS resolves to.
     A DNS rebinding attack could bypass this. Real security requires:
@@ -110,7 +110,7 @@ def _is_blocked_hostname(hostname: str) -> bool:
 
 def _normalize_proxy_target(target_url: str) -> str:
     """Normalize and validate proxy target URL.
-    
+
     Benjamin's aura context: In distributed environments, DNS resolution
     can return different IPs based on client location/conditions.
     This function resolves the hostname to verify the IP is not in
@@ -129,6 +129,7 @@ def _normalize_proxy_target(target_url: str) -> str:
     # This prevents DNS rebinding attacks where hostname appears safe
     # but resolves to a private/blocked IP
     import socket as _socket
+
     try:
         addr_info = _socket.getaddrinfo(hostname, None, _socket.AF_INET)
         for family, socktype, proto, canonname, sockaddr in addr_info:

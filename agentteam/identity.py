@@ -10,7 +10,12 @@ from dataclasses import dataclass, field
 def _env(agentteam_key: str, claude_code_key: str, default: str = "") -> str:
     """Read from AGENTTEAM_* first, fall back to OPENCLAW_* or CLAUDE_CODE_*."""
     openclaw_key = agentteam_key.replace("AGENTTEAM_", "OPENCLAW_", 1)
-    return os.environ.get(agentteam_key) or os.environ.get(openclaw_key) or os.environ.get(claude_code_key) or default
+    return (
+        os.environ.get(agentteam_key)
+        or os.environ.get(openclaw_key)
+        or os.environ.get(claude_code_key)
+        or default
+    )
 
 
 def _env_bool(agentteam_key: str, claude_code_key: str) -> bool:
@@ -50,7 +55,9 @@ class AgentIdentity:
             agent_type=_env("AGENTTEAM_AGENT_TYPE", "CLAUDE_CODE_AGENT_TYPE", "general-purpose"),
             team_name=_env("AGENTTEAM_TEAM_NAME", "CLAUDE_CODE_TEAM_NAME") or None,
             is_leader=_env_bool("AGENTTEAM_AGENT_LEADER", "CLAUDE_CODE_AGENT_LEADER"),
-            plan_mode_required=_env_bool("AGENTTEAM_PLAN_MODE_REQUIRED", "CLAUDE_CODE_PLAN_MODE_REQUIRED"),
+            plan_mode_required=_env_bool(
+                "AGENTTEAM_PLAN_MODE_REQUIRED", "CLAUDE_CODE_PLAN_MODE_REQUIRED"
+            ),
             model=_env("AGENTTEAM_MODEL", "CLAUDE_CODE_MODEL") or None,
         )
 

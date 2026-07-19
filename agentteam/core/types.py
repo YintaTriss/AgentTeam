@@ -64,9 +64,9 @@ class MessageType(Enum):
     # ── 苏格拉底产婆术 (Socratic Elenchus) ──────────────────────────
     SOCRATIC_QUESTION = "socratic_question"  # 诘问：质疑对方论点的漏洞
     # ── 柏拉图洞穴 allegory (Plato's Cave Allegory) ─────────────────
-    BLIND_SPOT_REPORT = "blind_spot_report"   # 全局视角汇报：汇报执行结果的"盲区"
+    BLIND_SPOT_REPORT = "blind_spot_report"  # 全局视角汇报：汇报执行结果的"盲区"
     # ── 尼采系谱学 (Nietzschean Genealogy) ─────────────────────────
-    GENEALOGY_TRACE = "genealogy_trace"       # 安全规则来源追踪：何时创建、何人创建、何原因
+    GENEALOGY_TRACE = "genealogy_trace"  # 安全规则来源追踪：何时创建、何人创建、何原因
 
     @classmethod
     def from_string(cls, value: str) -> "MessageType":

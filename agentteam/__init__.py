@@ -281,5 +281,18 @@ __all__ = [
     # Insights module (P16)
     "InsightsEngine",
     # Skill module (P13)
-    "SkillEngine", "SnapshotManager", "topological_sort", "CycleDetectedError", "assign_role", "get_agent_roles", "suggest_role", "AgentRole", "AsyncExecutor", "CircuitBreaker", "CircuitState", "CircuitOpenError", "get_circuit_breaker", "list_circuit_breakers"
+    "SkillEngine",
+    "SnapshotManager",
+    "topological_sort",
+    "CycleDetectedError",
+    "assign_role",
+    "get_agent_roles",
+    "suggest_role",
+    "AgentRole",
+    "AsyncExecutor",
+    "CircuitBreaker",
+    "CircuitState",
+    "CircuitOpenError",
+    "get_circuit_breaker",
+    "list_circuit_breakers",
 ]

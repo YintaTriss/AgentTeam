@@ -36,9 +36,11 @@ class CTMessage:
     read: bool = False
     metadata: dict = field(default_factory=dict)
     # ── 柏拉图洞穴 allegory — 全局视角汇报 ─────────────────────
-    blind_spot_report: Optional[str] = None   # 本次执行中我未看到的全局盲区
+    blind_spot_report: Optional[str] = None  # 本次执行中我未看到的全局盲区
     # ── 尼采系谱学 — 安全规则来源追踪 ─────────────────────────
-    genealogy_trace: Optional[dict] = None   # {rule_id, created_at, created_by, reason, parent_rule_id}
+    genealogy_trace: Optional[dict] = (
+        None  # {rule_id, created_at, created_by, reason, parent_rule_id}
+    )
 
     def to_dict(self) -> dict:
         """转换为字典"""
@@ -181,7 +183,9 @@ class CTInbox:
     def clear(self, agent_name: Optional[str] = None) -> None:
         """清除消息"""
         if agent_name:
-            self.messages = [m for m in self.messages if m.to_agent != agent_name and m.from_agent != agent_name]
+            self.messages = [
+                m for m in self.messages if m.to_agent != agent_name and m.from_agent != agent_name
+            ]
         else:
             self.messages = []
 

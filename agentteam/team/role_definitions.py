@@ -13,6 +13,7 @@ from pathlib import Path
 @dataclass
 class RoleDefinition:
     """Definition of an agent role with skills and system prompt."""
+
     name: str
     description: str
     skills: list[str] = field(default_factory=list)
