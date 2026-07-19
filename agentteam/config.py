@@ -362,39 +362,56 @@ def save_config(cfg: AppConfig) -> None:
     config_file = Path.home() / ".config" / "agentteam" / "config.json"
     config_file.parent.mkdir(parents=True, exist_ok=True)
     data = cfg.to_dict()
-    # DEBUG: dump config for debugging identity test failure
-    import sys
-    print(f"[DEBUG save_config] cfg.user={cfg.user!r}", file=sys.stderr, flush=True)
-    print(f"[DEBUG save_config] data['user']={data.get('user', '<missing>')!r}", file=sys.stderr, flush=True)
     # Remove nested configs from top-level for old format
     with open(config_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, default=str)
 
 
-def load_config(path: str = "config.yaml") -> AppConfig:
-    """Load configuration from file"""
+def load_config(path: Optional[str] = None) -> AppConfig:
+    """Load configuration from file.
+
+    Resolution order (when path is None/empty):
+      1. $AGENTTEAM_CONFIG env var (explicit override)
+      2. ~/.config/agentteam/config.json (primary)
+      3. ~/.agentteam/config.yaml (legacy)
+      4. ./config.yaml (project-local — only if HOME fallbacks absent)
+
+    Note: The previous default `path="config.yaml"` always checked CWD first,
+    which made the test suite vulnerable to any project-local config.yaml
+    (e.g. a dev's personal config in the repo root). Now we prefer HOME-based
+    locations and only fall back to CWD if those don't exist.
+    """
     global _config
-    import sys
-    # DEBUG
-    print(f"[DEBUG load_config] called, _config type={type(_config).__name__}", file=sys.stderr, flush=True)
-    # Check if path exists, otherwise check default config locations
-    config_path_obj = Path(path)
-    if not config_path_obj.exists():
-        # Try fallback locations in order:
-        # 1. ~/.agentteam/config.yaml (NEW - primary fallback)
-        # 2. ~/.config/agentteam/config.json (legacy fallback)
-        fallbacks = [
-            Path.home() / ".agentteam" / "config.yaml",
-            Path.home() / ".config" / "agentteam" / "config.json",
-        ]
-        for fallback in fallbacks:
-            if fallback.exists():
-                config_path_obj = fallback
-                break
-    print(f"[DEBUG load_config] config_path_obj={config_path_obj}", file=sys.stderr, flush=True)
-    print(f"[DEBUG load_config] config_path_obj.exists()={config_path_obj.exists()}", file=sys.stderr, flush=True)
+    # Explicit override wins
+    if path:
+        config_path_obj = Path(path)
+        if not config_path_obj.exists():
+            raise ConfigError(f"Config file not found: {path}")
+    else:
+        env_override = os.environ.get("AGENTTEAM_CONFIG")
+        if env_override:
+            config_path_obj = Path(env_override)
+            if not config_path_obj.exists():
+                raise ConfigError(f"AGENTTEAM_CONFIG points to missing file: {env_override}")
+        else:
+            home_candidates = [
+                Path.home() / ".config" / "agentteam" / "config.json",
+                Path.home() / ".agentteam" / "config.yaml",
+            ]
+            config_path_obj = None
+            for cand in home_candidates:
+                if cand.exists():
+                    config_path_obj = cand
+                    break
+            if config_path_obj is None:
+                # Last resort: project-local config (legacy behaviour)
+                local = Path("config.yaml")
+                if local.exists():
+                    config_path_obj = local
+                else:
+                    # No config anywhere — use defaults
+                    config_path_obj = Path("(default)")
     _config = AppConfig.load(str(config_path_obj))
-    print(f"[DEBUG load_config] loaded.user={_config.user!r}", file=sys.stderr, flush=True)
     return _config
 
 
