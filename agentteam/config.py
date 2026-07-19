@@ -194,9 +194,7 @@ class BaseConfig:
 
             # Type check
             if value is not None and not isinstance(value, field_info.field_type):
-                errors.append(
-                    f"{name}: expected {field_info.field_type.__name__}, got {type(value).__name__}"
-                )
+                errors.append(f"{name}: expected {field_info.field_type.__name__}, got {type(value).__name__}")
                 continue
 
             # Custom validator
@@ -311,9 +309,7 @@ class AppConfig(BaseConfig):
 
     # Model resolution (per-agent model selection)
     default_model: str = ""  # Fallback model when no other config applies
-    model_tiers: dict = field(
-        default_factory=dict
-    )  # Model tier aliases, e.g. {"strong": "claude-opus"}
+    model_tiers: dict = field(default_factory=dict)  # Model tier aliases, e.g. {"strong": "claude-opus"}
 
     # Nested configs
     database: Optional[DatabaseConfig] = None

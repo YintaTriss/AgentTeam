@@ -488,9 +488,7 @@ class SkillEngine:
         if skill.input_variables:
             for variable in skill.input_variables:
                 if variable.default_value is not None:
-                    prompt = re.sub(
-                        r"\{\{" + re.escape(variable.name) + r"\}\}", variable.default_value, prompt
-                    )
+                    prompt = re.sub(r"\{\{" + re.escape(variable.name) + r"\}\}", variable.default_value, prompt)
 
         # 移除仍未替换的占位符（留空）
         prompt = re.sub(r"\{\{[a-zA-Z_][a-zA-Z0-9_]*\}\}", "", prompt)
@@ -502,9 +500,7 @@ class SkillEngine:
         return prompt.strip()
 
     @staticmethod
-    def parse_variables(
-        user_input: str, variables: Optional[List[SkillVariable]]
-    ) -> Dict[str, Any]:
+    def parse_variables(user_input: str, variables: Optional[List[SkillVariable]]) -> Dict[str, Any]:
         """
         从用户输入中解析 --varname=value 格式的变量
 

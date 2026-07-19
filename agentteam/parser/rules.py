@@ -61,9 +61,7 @@ CLAUDE_RULES: list[ParserRule] = [
             re.compile(r"[⏺●]\s*Read\s*\(?([^\s)]+)"),
         ],
         extract_detail=lambda line: (
-            f"读取文件: {m.group(1)}"
-            if (m := re.search(r"[⏺●]\s*Read\s*\(?([^\s)]+)", line))
-            else "读取文件"
+            f"读取文件: {m.group(1)}" if (m := re.search(r"[⏺●]\s*Read\s*\(?([^\s)]+)", line)) else "读取文件"
         ),
     ),
     # Write/Edit file
@@ -95,9 +93,7 @@ CLAUDE_RULES: list[ParserRule] = [
             re.compile(r"[⏺●]\s*Bash\s*\(?(.+)\)?"),
         ],
         extract_detail=lambda line: (
-            f"执行命令: {m.group(1)[:80]}"
-            if (m := re.search(r"[⏺●]\s*Bash\s*\(?(.+?)\)?$", line))
-            else "执行命令"
+            f"执行命令: {m.group(1)[:80]}" if (m := re.search(r"[⏺●]\s*Bash\s*\(?(.+?)\)?$", line)) else "执行命令"
         ),
     ),
     # Search
@@ -270,9 +266,7 @@ GEMINI_RULES: list[ParserRule] = [
             re.compile(r"Running:\s+(.+)", re.IGNORECASE),
         ],
         extract_detail=lambda line: (
-            f"执行命令: {m.group(1)[:80]}"
-            if (m := re.search(r"Running:\s+(.+)", line, re.IGNORECASE))
-            else "执行命令"
+            f"执行命令: {m.group(1)[:80]}" if (m := re.search(r"Running:\s+(.+)", line, re.IGNORECASE)) else "执行命令"
         ),
     ),
 ]

@@ -118,8 +118,7 @@ class ManagerEffectivenessFeedback:
         return (
             weights["objective"] * self.objective_achievement_rate
             + weights["quality"] * self.team_output_quality
-            + weights["decision"]
-            * (self.decision_quality_score * 0.6 + self.decision_speed_score * 0.4)
+            + weights["decision"] * (self.decision_quality_score * 0.6 + self.decision_speed_score * 0.4)
             + weights["resource"] * self.resource_efficiency
             + weights["development"] * self.agent_development_score
         )
@@ -374,9 +373,7 @@ class OrganizationalLearningEngine:
 
         return record
 
-    def _assess_reusability(
-        self, learning_type: str, quality_score: float, task_result: str
-    ) -> str:
+    def _assess_reusability(self, learning_type: str, quality_score: float, task_result: str) -> str:
         """评估学习的可复用性"""
         if quality_score < 0.3:
             return "low"
@@ -437,9 +434,7 @@ class OrganizationalLearningEngine:
             "by_reusability": by_reusability,
             "average_quality_score": round(avg_quality, 3),
             "total_applications": total_applications,
-            "learning_effectiveness": round(total_applications / max(1, total), 2)
-            if total > 0
-            else 0,
+            "learning_effectiveness": round(total_applications / max(1, total), 2) if total > 0 else 0,
         }
 
 
@@ -515,9 +510,7 @@ class MBOTargetAlignment:
 
         # 计算对齐度
         aligned_tasks = sum(
-            1
-            for tid in self.task_objective_mapping
-            if self.task_objective_mapping[tid] in objective_ids
+            1 for tid in self.task_objective_mapping if self.task_objective_mapping[tid] in objective_ids
         )
         alignment_rate = aligned_tasks / max(1, len(self.task_objective_mapping))
 
@@ -544,12 +537,8 @@ class MBOTargetAlignment:
     def get_alignment_report(self) -> Dict:
         """生成目标对齐报告"""
         total_objectives = len(self.team_objectives)
-        achieved = sum(
-            1 for o in self.team_objectives.values() if o.state == ObjectiveState.ACHIEVED
-        )
-        in_progress = sum(
-            1 for o in self.team_objectives.values() if o.state == ObjectiveState.IN_PROGRESS
-        )
+        achieved = sum(1 for o in self.team_objectives.values() if o.state == ObjectiveState.ACHIEVED)
+        in_progress = sum(1 for o in self.team_objectives.values() if o.state == ObjectiveState.IN_PROGRESS)
 
         total_tasks = len(self.task_objective_mapping)
         aligned_tasks = total_tasks

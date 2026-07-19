@@ -271,9 +271,7 @@ class SupervisorEngine:
     Inspired by SpectrAI supervisorPrompt.ts design.
     """
 
-    def __init__(
-        self, team_name: str, rules: List[DecompositionRule] = None, storage_dir: str = None
-    ):
+    def __init__(self, team_name: str, rules: List[DecompositionRule] = None, storage_dir: str = None):
         self.team_name = team_name
         self.provider_selector = get_provider_selector(team_name)
         self.router = get_router(team_name)
@@ -283,9 +281,7 @@ class SupervisorEngine:
         self._verification_results: Dict[str, VerificationResult] = {}
 
         # Plan persistence settings
-        self._storage_dir = storage_dir or os.path.join(
-            os.path.expanduser("~/.agentteam"), "plans", team_name
-        )
+        self._storage_dir = storage_dir or os.path.join(os.path.expanduser("~/.agentteam"), "plans", team_name)
         self._version = "1.0"
         self._ensure_storage_dir()
 
@@ -604,9 +600,7 @@ class SupervisorEngine:
 
         return tasks
 
-    def _select_provider_for_task(
-        self, task: TaskItem, rule: DecompositionRule, all_tasks: List[TaskItem]
-    ) -> str:
+    def _select_provider_for_task(self, task: TaskItem, rule: DecompositionRule, all_tasks: List[TaskItem]) -> str:
         """Select the best provider for a task with fallback support."""
         task_idx = int(task.id.split("-")[-1])
         preferred = rule.provider_preferences.get(task_idx, "claude")

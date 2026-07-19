@@ -138,9 +138,7 @@ class DecomposerStats:
     failed_tasks: int = 0
     avg_subtask_count: float = 0.0
     avg_duration: float = 0.0
-    strategy_effectiveness: Dict[str, float] = field(
-        default_factory=dict
-    )  # strategy -> avg_feedback
+    strategy_effectiveness: Dict[str, float] = field(default_factory=dict)  # strategy -> avg_feedback
     complexity_accuracy: Dict[str, float] = field(default_factory=dict)  # complexity -> accuracy
     recent_executions: List[Dict] = field(default_factory=list)
     override_active: bool = False
@@ -658,17 +656,13 @@ class AdaptiveDecomposer:
 
             # 子任务数量
             if forced_subtask_count:
-                subtask_count = max(
-                    self._min_subtasks, min(self._max_subtasks, forced_subtask_count)
-                )
+                subtask_count = max(self._min_subtasks, min(self._max_subtasks, forced_subtask_count))
             else:
                 range_min, range_max = self._estimate_subtask_count(complexity)
                 subtask_count = (range_min + range_max) // 2
 
             # 生成子任务
-            sub_tasks = self._generate_subtasks(
-                task_id, task_description, complexity, subtask_count
-            )
+            sub_tasks = self._generate_subtasks(task_id, task_description, complexity, subtask_count)
 
             # 计算置信度
             confidence = 0.7  # 基础置信度
@@ -728,9 +722,7 @@ class AdaptiveDecomposer:
             total = self._stats.total_tasks
             old_avg_count = self._stats.avg_subtask_count
             old_avg_duration = self._stats.avg_duration
-            self._stats.avg_subtask_count = (
-                old_avg_count * (total - 1) + len(result.sub_tasks)
-            ) / total
+            self._stats.avg_subtask_count = (old_avg_count * (total - 1) + len(result.sub_tasks)) / total
             self._stats.avg_duration = (old_avg_duration * (total - 1) + actual_duration) / total
 
             # 更新策略效果
@@ -738,9 +730,7 @@ class AdaptiveDecomposer:
             if user_feedback is not None:
                 current_effect = self._stats.strategy_effectiveness.get(strategy_key, 0.5)
                 # 指数移动平均
-                self._stats.strategy_effectiveness[strategy_key] = (
-                    current_effect * 0.7 + user_feedback * 0.3
-                )
+                self._stats.strategy_effectiveness[strategy_key] = current_effect * 0.7 + user_feedback * 0.3
 
             # 更新复杂度准确率（简化版）
             complexity_key = result.complexity.value
@@ -821,17 +811,13 @@ class AdaptiveDecomposer:
                 worst_strategy = min(self._stats.strategy_effectiveness.items(), key=lambda x: x[1])
                 if worst_strategy[1] < 0.4:
                     suggestions.append(
-                        f"策略 '{worst_strategy[0]}' 效果较差 (反馈: {worst_strategy[1]:.2f})，"
-                        "建议在复杂任务中避免使用"
+                        f"策略 '{worst_strategy[0]}' 效果较差 (反馈: {worst_strategy[1]:.2f})，建议在复杂任务中避免使用"
                     )
 
             # 分析复杂度评估
             for complexity, accuracy in self._stats.complexity_accuracy.items():
                 if accuracy < 0.5:
-                    suggestions.append(
-                        f"复杂度 '{complexity}' 的评估准确率较低 ({accuracy:.2f})，"
-                        "建议手动指定复杂度"
-                    )
+                    suggestions.append(f"复杂度 '{complexity}' 的评估准确率较低 ({accuracy:.2f})，建议手动指定复杂度")
 
             # 分析子任务数量
             if self._stats.avg_subtask_count > 10:
@@ -841,15 +827,13 @@ class AdaptiveDecomposer:
                 )
             elif self._stats.avg_subtask_count < 2:
                 suggestions.append(
-                    f"平均子任务数偏低 ({self._stats.avg_subtask_count:.1f})，"
-                    "考虑将任务进一步分解以提高并行度"
+                    f"平均子任务数偏低 ({self._stats.avg_subtask_count:.1f})，考虑将任务进一步分解以提高并行度"
                 )
 
             # 分析执行时长
             if self._stats.avg_duration > 30:
                 suggestions.append(
-                    f"平均执行时间较长 ({self._stats.avg_duration:.1f}min)，"
-                    "考虑将大任务分解为更小的子任务"
+                    f"平均执行时间较长 ({self._stats.avg_duration:.1f}min)，考虑将大任务分解为更小的子任务"
                 )
 
         return suggestions

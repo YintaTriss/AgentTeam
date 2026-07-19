@@ -243,9 +243,7 @@ class CyberneticFeedbackLoop:
             "feedback_count": len(feedbacks),
             "avg_deviation": total_deviation / len(feedbacks),
             "avg_quality": avg_quality,
-            "needs_adjustment": any(
-                f.deviation > self.config.deviation_threshold for f in feedbacks
-            ),
+            "needs_adjustment": any(f.deviation > self.config.deviation_threshold for f in feedbacks),
             "status": "feedback_collected",
         }
 
@@ -256,12 +254,8 @@ class CyberneticFeedbackLoop:
     def get_cybernetic_report(self) -> Dict[str, Any]:
         """生成控制论反馈回路报告"""
         total_acks = len(self._pending_acks)
-        completed_acks = sum(
-            1 for ack in self._pending_acks.values() if ack.status == FeedbackStatus.RECEIVED
-        )
-        timed_out_acks = sum(
-            1 for ack in self._pending_acks.values() if ack.status == FeedbackStatus.TIMEOUT
-        )
+        completed_acks = sum(1 for ack in self._pending_acks.values() if ack.status == FeedbackStatus.RECEIVED)
+        timed_out_acks = sum(1 for ack in self._pending_acks.values() if ack.status == FeedbackStatus.TIMEOUT)
 
         all_feedbacks = [f for feedbacks in self._execution_feedback.values() for f in feedbacks]
 

@@ -129,14 +129,10 @@ class CircuitBreaker:
 
         # HALF_OPEN 状态：限制并发数
         if self._state == CircuitState.HALF_OPEN:
-            acquired = self._half_open_semaphore.acquire(
-                blocking=True, timeout=self.recovery_timeout
-            )
+            acquired = self._half_open_semaphore.acquire(blocking=True, timeout=self.recovery_timeout)
             if not acquired:
                 self.stats.rejected()
-                raise CircuitOpenError(
-                    self.name, max(0, self.recovery_timeout - (time.time() - self._opened_at))
-                )
+                raise CircuitOpenError(self.name, max(0, self.recovery_timeout - (time.time() - self._opened_at)))
 
         try:
             result = func(*args, **kwargs)
@@ -246,14 +242,10 @@ class CircuitBreaker:
                 "stats": {
                     "total_calls": self.stats.total_calls,
                     "success_rate": (
-                        self.stats.successful_calls / self.stats.total_calls
-                        if self.stats.total_calls > 0
-                        else 0.0
+                        self.stats.successful_calls / self.stats.total_calls if self.stats.total_calls > 0 else 0.0
                     ),
                     "failure_rate": (
-                        self.stats.failed_calls / self.stats.total_calls
-                        if self.stats.total_calls > 0
-                        else 0.0
+                        self.stats.failed_calls / self.stats.total_calls if self.stats.total_calls > 0 else 0.0
                     ),
                     "rejected_calls": self.stats.rejected_calls,
                     "consecutive_failures": self.stats.consecutive_failures,

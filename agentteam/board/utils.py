@@ -147,9 +147,7 @@ def _normalize_proxy_target(target_url: str) -> str:
                 ]
                 for network in blocked_ranges:
                     if ip in network:
-                        raise ValueError(
-                            f"Hostname '{hostname}' resolved to blocked IP range: {ip_str}"
-                        )
+                        raise ValueError(f"Hostname '{hostname}' resolved to blocked IP range: {ip_str}")
             except ValueError:
                 # Not a valid IP format, skip range check
                 pass

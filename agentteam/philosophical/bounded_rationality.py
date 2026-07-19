@@ -132,9 +132,7 @@ class BoundedRationalityTracker:
 
         return decl
 
-    def can_assign_task(
-        self, agent_name: str, required_domains: List[str]
-    ) -> tuple[bool, List[str]]:
+    def can_assign_task(self, agent_name: str, required_domains: List[str]) -> tuple[bool, List[str]]:
         """
         检查是否可以分配任务给 agent
         返回 (可以分配, 缺少的领域列表)
@@ -151,9 +149,7 @@ class BoundedRationalityTracker:
 
         return len(missing) == 0, missing
 
-    def find_competent_agents(
-        self, required_domains: List[str], exclude: List[str] = None
-    ) -> List[tuple[str, float]]:
+    def find_competent_agents(self, required_domains: List[str], exclude: List[str] = None) -> List[tuple[str, float]]:
         """
         找到能够处理所需领域的 agent，按信心度排序
         返回 [(agent_name, confidence), ...]
@@ -195,9 +191,7 @@ class BoundedRationalityTracker:
         """生成有限理性协调报告"""
         total_agents = len(self.knowledge_boundaries)
         uncertain_agents = sum(
-            1
-            for kb in self.knowledge_boundaries.values()
-            if kb.confidence_level < self._calibration_threshold
+            1 for kb in self.knowledge_boundaries.values() if kb.confidence_level < self._calibration_threshold
         )
 
         return {

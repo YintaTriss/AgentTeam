@@ -151,9 +151,7 @@ class GestellAnalyzer:
     ]
 
     def __init__(self, custom_layers: List[GestellLayer] = None):
-        self.gestell_layers = (
-            custom_layers if custom_layers is not None else self.DEFAULT_GESTELL_LAYERS
-        )
+        self.gestell_layers = custom_layers if custom_layers is not None else self.DEFAULT_GESTELL_LAYERS
         self.unaskable_questions: List[UnaskableQuestion] = []
         self._question_counter = 0
 

@@ -566,9 +566,7 @@ class IdempotencyManager:
                 raise ValueError(f"Transaction {transaction_id} not found")
 
             if tx.status != "active":
-                raise ValueError(
-                    f"Transaction {transaction_id} is not active (status: {tx.status})"
-                )
+                raise ValueError(f"Transaction {transaction_id} is not active (status: {tx.status})")
 
         # 准备消息列表（按添加顺序）
         messages = []
@@ -624,9 +622,7 @@ class IdempotencyManager:
             for key_str in tx.idempotency_keys:
                 record = self._store.get(key_str)
                 if record and record.status == MessageStatus.PROCESSING:
-                    self._store.update_status(
-                        key_str, MessageStatus.FAILED, error="Transaction rolled back"
-                    )
+                    self._store.update_status(key_str, MessageStatus.FAILED, error="Transaction rolled back")
 
             tx.status = "rolled_back"
             logger.info(f"Transaction {transaction_id} rolled back")
@@ -679,9 +675,7 @@ class IdempotencyManager:
         with self._global_lock:
             return {
                 "store_stats": self._store.get_stats(),
-                "active_transactions": len(
-                    [tx for tx in self._transactions.values() if tx.status == "active"]
-                ),
+                "active_transactions": len([tx for tx in self._transactions.values() if tx.status == "active"]),
                 "total_transactions": len(self._transactions),
                 "registered_handlers": len(self._handlers),
             }

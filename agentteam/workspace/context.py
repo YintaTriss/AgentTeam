@@ -289,9 +289,7 @@ def inject_context(
             continue
         common = target_files & set(entry["files"])
         if common:
-            related.append(
-                f"- [{entry['agent']}] {entry['hash'][:8]} {entry['message']} (files: {', '.join(common)})"
-            )
+            related.append(f"- [{entry['agent']}] {entry['hash'][:8]} {entry['message']} (files: {', '.join(common)})")
     if related:
         sections.append("## Recent Related Changes\n" + "\n".join(related))
 

@@ -111,9 +111,7 @@ class CTTeam:
         # 【Bengio注意力可视化】追踪每个 agent 的"注意力"分布
         # 即每个 agent 在关注谁（哪个 agent 或任务）
         # 用于解释 multi-agent 协调中每个 agent 在"看什么"
-        self._agent_attention: Dict[
-            str, Dict[str, float]
-        ] = {}  # agent_name -> {target: attention_weight}
+        self._agent_attention: Dict[str, Dict[str, float]] = {}  # agent_name -> {target: attention_weight}
 
         # 消息传递的注意力权重（基于消息类型和频率）
         # 【Bengio注意力可视化】不同类型的消息有不同的注意力权重
@@ -404,9 +402,7 @@ class CTTeam:
         """获取任务"""
         return self.tasks.get(task_id)
 
-    def assign_task(
-        self, task_id: str, agent_name: str, required_domains: List[str] = None
-    ) -> bool:
+    def assign_task(self, task_id: str, agent_name: str, required_domains: List[str] = None) -> bool:
         """分配任务给 Agent
 
         Simon 有限理性：任务分配应考虑 agent 的知识边界
@@ -418,14 +414,10 @@ class CTTeam:
         if task and agent:
             # ── Simon 有限理性检查 ────────────────────────────────
             if required_domains:
-                can_assign, missing = self.bounded_rationality.can_assign_task(
-                    agent_name, required_domains
-                )
+                can_assign, missing = self.bounded_rationality.can_assign_task(agent_name, required_domains)
                 if not can_assign:
                     # Agent 知识边界不足，建议寻找其他 agent
-                    candidates = self.bounded_rationality.find_competent_agents(
-                        required_domains, exclude=[agent_name]
-                    )
+                    candidates = self.bounded_rationality.find_competent_agents(required_domains, exclude=[agent_name])
                     if candidates:
                         suggested_agent = candidates[0][0]
                         # 记录不确定性声明
@@ -576,9 +568,7 @@ class CTTeam:
         message_type: Optional[MessageType] = None,
     ) -> List[CTMessage]:
         """获取消息，支持按消息类型过滤（包括 SOCRATIC_QUESTION、BLIND_SPOT_REPORT、GENEALOGY_TRACE）"""
-        return self.inbox.get_messages(
-            agent_name=agent_name, unread_only=unread_only, message_type=message_type
-        )
+        return self.inbox.get_messages(agent_name=agent_name, unread_only=unread_only, message_type=message_type)
 
     # ==================== Status & Utilities ====================
 
@@ -596,9 +586,7 @@ class CTTeam:
             "tasks": {
                 "total": len(self.tasks),
                 "completed": sum(1 for t in self.tasks.values() if t.state == TaskState.COMPLETED),
-                "in_progress": sum(
-                    1 for t in self.tasks.values() if t.state == TaskState.IN_PROGRESS
-                ),
+                "in_progress": sum(1 for t in self.tasks.values() if t.state == TaskState.IN_PROGRESS),
             },
             "inbox": {
                 "total": len(self.inbox.messages),
@@ -607,17 +595,13 @@ class CTTeam:
             # ── Wiener 控制论反馈回路健康状态 ─────────────────────
             "cybernetic_feedback": {
                 "pending_acks": self.feedback_loop.get_pending_acks_count(),
-                "health": self.feedback_loop.get_cybernetic_report().get(
-                    "feedback_loop_health", "unknown"
-                ),
+                "health": self.feedback_loop.get_cybernetic_report().get("feedback_loop_health", "unknown"),
             },
             # ── Simon 有限理性状态 ────────────────────────────────
             "bounded_rationality": {
                 "tracked_agents": len(self.bounded_rationality.knowledge_boundaries),
                 "uncertain_agents": sum(
-                    1
-                    for kb in self.bounded_rationality.knowledge_boundaries.values()
-                    if kb.confidence_level < 0.8
+                    1 for kb in self.bounded_rationality.knowledge_boundaries.values() if kb.confidence_level < 0.8
                 ),
             },
             # ── Bengio 注意力可视化状态 ───────────────────────────
@@ -759,9 +743,7 @@ class CTTeam:
         if coverage.planning_coverage < 0.7:
             coverage.improvement_suggestions.append("建议：建立更正式的目标设定和战略规划流程")
         if coverage.commanding_coverage < 0.7:
-            coverage.improvement_suggestions.append(
-                "建议：明确 coordinator agent 的领导角色和指令传达机制"
-            )
+            coverage.improvement_suggestions.append("建议：明确 coordinator agent 的领导角色和指令传达机制")
         if coverage.controlling_coverage < 0.7:
             coverage.improvement_suggestions.append("建议：增强偏差检测和纠正机制")
 
@@ -935,10 +917,7 @@ class CTTeam:
             # ── 渐进式警告：避免无限等待 ───────────────────────────
             elapsed = time.time() - start
             if elapsed > 60 and time.time() - last_warning_time > 60:
-                logging.warning(
-                    f"[Bounded Rationality] wait_all 等待已超过 {elapsed:.0f}秒"
-                    f" - 可能存在死锁或任务卡住"
-                )
+                logging.warning(f"[Bounded Rationality] wait_all 等待已超过 {elapsed:.0f}秒 - 可能存在死锁或任务卡住")
                 last_warning_time = time.time()
 
                 # ── 可选的死锁检测 ───────────────────────────────
@@ -952,8 +931,7 @@ class CTTeam:
         # ── 超时：违反有限理性 ───────────────────────────────────
         elapsed = time.time() - start
         logging.error(
-            f"[Bounded Rationality] wait_all 超时 ({timeout}秒)"
-            f" - 这违反了 Simon 的有限理性原则：不应该无限等待"
+            f"[Bounded Rationality] wait_all 超时 ({timeout}秒) - 这违反了 Simon 的有限理性原则：不应该无限等待"
         )
         return self.get_status()
 
@@ -988,12 +966,8 @@ class CTTeam:
                     state = json.load(f)
 
                 self.name = state.get("name", self.name)
-                self.agents = {
-                    name: CTAgent.from_dict(data) for name, data in state.get("agents", {}).items()
-                }
-                self.tasks = {
-                    tid: CTTask.from_dict(data) for tid, data in state.get("tasks", {}).items()
-                }
+                self.agents = {name: CTAgent.from_dict(data) for name, data in state.get("agents", {}).items()}
+                self.tasks = {tid: CTTask.from_dict(data) for tid, data in state.get("tasks", {}).items()}
                 self.inbox = CTInbox.from_dict(state.get("inbox", {}))
                 self.hierarchy = AgentHierarchy.from_dict(state.get("hierarchy", {}))
             except Exception:
@@ -1011,13 +985,8 @@ class CTTeam:
     def from_dict(cls, data: dict, storage_path: Optional[Path] = None) -> "CTTeam":
         """从字典创建"""
         team = cls(data.get("name", "unknown"), storage_path=storage_path)
-        team.agents = {
-            name: CTAgent.from_dict(agent_data)
-            for name, agent_data in data.get("agents", {}).items()
-        }
-        team.tasks = {
-            tid: CTTask.from_dict(task_data) for tid, task_data in data.get("tasks", {}).items()
-        }
+        team.agents = {name: CTAgent.from_dict(agent_data) for name, agent_data in data.get("agents", {}).items()}
+        team.tasks = {tid: CTTask.from_dict(task_data) for tid, task_data in data.get("tasks", {}).items()}
         return team
 
 
@@ -1291,9 +1260,7 @@ class RuleGenealogyTracker:
             "total_rules": len(self.policies),
             "active_rules": len([r for r in self.policies.values() if not r.is_overridden]),
             "overridden_rules": len([r for r in self.policies.values() if r.is_overridden]),
-            "rules": {
-                rule_id: self.get_genealogy(rule_id) for rule_id, rule in self.policies.items()
-            },
+            "rules": {rule_id: self.get_genealogy(rule_id) for rule_id, rule in self.policies.items()},
         }
 
 
